@@ -2,16 +2,20 @@ import React, { useState } from "react"
 import { useAccount, useConnect, useDisconnect } from "wagmi"
 import { metaMask, walletConnect } from "wagmi/connectors"
 
-export const projectId = process.env.NEXT_PUBLIC_PROJECT_ID
+export const projectId = process.env.NEXT_PUBLIC_PROJECT_ID;
 
 export default function NavBar() {
   const { address, isConnected } = useAccount()
-  const { connect, connectors, isLoading, pendingConnector } = useConnect()
+  const { connect, status, variables } = useConnect()
   const { disconnect } = useDisconnect()
   const [showWalletOptions, setShowWalletOptions] = useState(false)
 
-  const handleConnect = (connector) => {
-    connect({ connector })
+  const handleConnectMetaMask = () => {
+    connect({ connector: metaMask() })
+    setShowWalletOptions(false)
+  }
+  const handleConnectWalletConnect = () => {
+    connect({ connector: walletConnect({ projectId }) })
     setShowWalletOptions(false)
   }
 
@@ -70,7 +74,7 @@ export default function NavBar() {
                 }}
               >
                 <button
-                  onClick={() => handleConnect(metaMask())}
+                  onClick={handleConnectMetaMask}
                   style={{
                     width: "100%",
                     background: "none",
@@ -83,12 +87,12 @@ export default function NavBar() {
                     cursor: "pointer",
                     textAlign: "left",
                   }}
-                  disabled={isLoading && pendingConnector?.id === metaMask().id}
+                  disabled={status === "pending" && variables?.connector?.name === "MetaMask"}
                 >
-                  {isLoading && pendingConnector?.id === metaMask().id ? "Connecting..." : "MetaMask"}
+                  {status === "pending" && variables?.connector?.name === "MetaMask" ? "Connecting..." : "MetaMask"}
                 </button>
                 <button
-                  onClick={() => handleConnect(walletConnect({ projectId }))}
+                  onClick={handleConnectWalletConnect}
                   style={{
                     width: "100%",
                     background: "none",
@@ -101,9 +105,9 @@ export default function NavBar() {
                     cursor: "pointer",
                     textAlign: "left",
                   }}
-                  disabled={isLoading && pendingConnector?.id === walletConnect({ projectId }).id}
+                  disabled={status === "pending" && variables?.connector?.name === "WalletConnect"}
                 >
-                  {isLoading && pendingConnector?.id === walletConnect({ projectId }).id ? "Connecting..." : "WalletConnect"}
+                  {status === "pending" && variables?.connector?.name === "WalletConnect" ? "Connecting..." : "WalletConnect"}
                 </button>
               </div>
             )}
