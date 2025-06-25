@@ -5,7 +5,7 @@ interface CRTContainerProps {
 }
 
 // These values are estimated for the screen area of the CRT image
-const SCREEN_TOP = "13%"
+const SCREEN_TOP = "10%"
 const SCREEN_LEFT = "8%"
 const SCREEN_WIDTH = "84%"
 const SCREEN_HEIGHT = "68%"
