@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import AboutPage from "./about-page"
 import CRTContainer from "./components/CRTContainer"
+import NavBar from "./components/NavBar"
 
 type GameState = "boot" | "inbox" | "reading" | "character-select" | "mini-game" | "writing" | "sent" | "about"
 type Character = "officer" | "agent" | "monkey" | "intern"
@@ -168,187 +169,190 @@ export default function Component() {
   }
 
   return (
-    <CRTContainer>
-      <Card className="border-2 border-green-400 bg-black text-green-400 w-full h-full flex flex-col">
-        {/* Header */}
-        <div className="border-b-2 border-green-400 p-4 bg-black">
-          <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold text-center flex-1">═══ LETSWRITEAN.EMAIL ═══</h1>
-            <div className="flex gap-4 text-sm">
-              <Badge variant="outline" className="border-yellow-400 text-yellow-400">
-                SAD: {sadCoins}
-              </Badge>
-              <Badge variant="outline" className="border-pink-400 text-pink-400">
-                FEELS: {feels}
-              </Badge>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setGameState("about")}
-                className="border-cyan-400 text-cyan-400 hover:bg-cyan-900/20"
-              >
-                ABOUT
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        {/* Main Terminal */}
-        <div className="flex-1 overflow-auto p-6">
-          {gameState === "boot" && (
-            <div className="space-y-2">
-              <div className="text-center mb-8">
-                <div className="text-6xl mb-4">💻</div>
-                <div className="text-xl">BOOTING SYSTEM...</div>
-              </div>
-              <pre className="whitespace-pre-wrap text-sm leading-relaxed">{bootText}</pre>
-              <div className="flex justify-center mt-4">
-                <div className="animate-pulse">█</div>
-              </div>
-            </div>
-          )}
-
-          {gameState === "inbox" && (
-            <div>
-              <h2 className="text-xl mb-4">📧 INBOX (4 unread)</h2>
-              <div className="space-y-2">
-                {emails.map((email) => (
-                  <div
-                    key={email.id}
-                    onClick={() => handleEmailClick(email)}
-                    className="border border-green-400 p-3 cursor-pointer hover:bg-green-900/20 transition-colors"
-                  >
-                    <div className="flex justify-between">
-                      <span className="font-bold">{email.from}</span>
-                      <span className="text-xs">{"[UNREAD]"}</span>
-                    </div>
-                    <div className="text-green-300">{email.subject}</div>
-                    <div className="text-green-500 text-sm">{email.preview}</div>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-6 p-4 border border-yellow-400 text-yellow-400 text-sm">
-                <strong>GAME THEORY INSIGHT:</strong> Each email choice creates a different game tree with unique
-                incentive structures and outcomes!
-              </div>
-            </div>
-          )}
-
-          {gameState === "reading" && selectedEmail && selectedCharacter && (
-            <div>
-              <div className="mb-4">
+    <>
+      <NavBar />
+      <CRTContainer>
+        <Card className="border-2 border-green-400 bg-black text-green-400 w-full h-full flex flex-col">
+          {/* Header */}
+          <div className="border-b-2 border-green-400 p-4 bg-black">
+            <div className="flex justify-between items-center">
+              <h1 className="text-2xl font-bold text-center flex-1">═══ LETSWRITEAN.EMAIL ═══</h1>
+              <div className="flex gap-4 text-sm">
+                <Badge variant="outline" className="border-yellow-400 text-yellow-400">
+                  SAD: {sadCoins}
+                </Badge>
+                <Badge variant="outline" className="border-pink-400 text-pink-400">
+                  FEELS: {feels}
+                </Badge>
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setGameState("inbox")}
-                  className="border-green-400 text-green-400 hover:bg-green-900/20"
+                  onClick={() => setGameState("about")}
+                  className="border-cyan-400 text-cyan-400 hover:bg-cyan-900/20"
                 >
-                  ← Back to Inbox
-                </Button>
-              </div>
-              <div className="border border-green-400 p-4 mb-4">
-                <div className="text-sm text-green-500 mb-2">FROM: {selectedEmail.from}</div>
-                <div className="text-lg mb-4">{selectedEmail.subject}</div>
-                <div className="text-green-300 leading-relaxed">{characterResponses[selectedCharacter].response}</div>
-              </div>
-              <div className="text-center">
-                <Button onClick={handleCharacterInteraction} className="bg-green-600 hover:bg-green-700 text-black">
-                  Get up from desk and procrastinate →
+                  ABOUT
                 </Button>
               </div>
             </div>
-          )}
+          </div>
 
-          {gameState === "character-select" && selectedCharacter && (
-            <div>
-              <h2 className="text-xl mb-4">🎮 Time to "Take a Break"</h2>
-              <div className="border border-green-400 p-4 mb-4">
-                <h3 className="text-lg mb-2">{characterResponses[selectedCharacter].name}</h3>
-                <p className="text-green-300 mb-4">{characterResponses[selectedCharacter].emailHelp}</p>
-                <div className="text-yellow-400 text-sm mb-4">
-                  Available Mini-Game: {characterResponses[selectedCharacter].miniGame}
+          {/* Main Terminal */}
+          <div className="flex-1 overflow-auto p-6">
+            {gameState === "boot" && (
+              <div className="space-y-2">
+                <div className="text-center mb-8">
+                  <div className="text-6xl mb-4">💻</div>
+                  <div className="text-xl">BOOTING SYSTEM...</div>
+                </div>
+                <pre className="whitespace-pre-wrap text-sm leading-relaxed">{bootText}</pre>
+                <div className="flex justify-center mt-4">
+                  <div className="animate-pulse">█</div>
                 </div>
               </div>
-              <div className="text-center">
-                <Button onClick={playMiniGame} className="bg-red-600 hover:bg-red-700 text-white">
-                  Play Intentionally Frustrating Mini-Game
-                </Button>
-              </div>
-            </div>
-          )}
+            )}
 
-          {gameState === "mini-game" && selectedCharacter && (
-            <div className="text-center">
-              <h2 className="text-xl mb-4">🎯 {characterResponses[selectedCharacter].miniGame}</h2>
-              <div className="border border-red-400 p-8 mb-4 bg-red-900/10">
-                <div className="text-6xl mb-4">🎮</div>
-                <div className="text-red-400 mb-4">Playing intentionally buggy mini-game...</div>
-                <div className="text-sm text-red-300">
-                  Controls are laggy, hitboxes are broken, and you're losing SAD coins!
+            {gameState === "inbox" && (
+              <div>
+                <h2 className="text-xl mb-4">📧 INBOX (4 unread)</h2>
+                <div className="space-y-2">
+                  {emails.map((email) => (
+                    <div
+                      key={email.id}
+                      onClick={() => handleEmailClick(email)}
+                      className="border border-green-400 p-3 cursor-pointer hover:bg-green-900/20 transition-colors"
+                    >
+                      <div className="flex justify-between">
+                        <span className="font-bold">{email.from}</span>
+                        <span className="text-xs">{"[UNREAD]"}</span>
+                      </div>
+                      <div className="text-green-300">{email.subject}</div>
+                      <div className="text-green-500 text-sm">{email.preview}</div>
+                    </div>
+                  ))}
                 </div>
-                <div className="mt-4 animate-pulse">Loading frustration... Please wait...</div>
+                <div className="mt-6 p-4 border border-yellow-400 text-yellow-400 text-sm">
+                  <strong>GAME THEORY INSIGHT:</strong> Each email choice creates a different game tree with unique
+                  incentive structures and outcomes!
+                </div>
               </div>
-              <div className="text-yellow-400 text-sm">
-                This is designed to be annoying so you'll want to go back to writing emails!
-              </div>
-            </div>
-          )}
+            )}
 
-          {gameState === "writing" && (
-            <div>
-              <h2 className="text-xl mb-4">✍️ Email Composition</h2>
-              <div className="border border-green-400 p-4 mb-4">
-                <div className="text-sm text-green-500 mb-2">
-                  AI Assistant ({selectedCharacter?.toUpperCase()}) is helping you write...
+            {gameState === "reading" && selectedEmail && selectedCharacter && (
+              <div>
+                <div className="mb-4">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setGameState("inbox")}
+                    className="border-green-400 text-green-400 hover:bg-green-900/20"
+                  >
+                    ← Back to Inbox
+                  </Button>
                 </div>
-                <div className="bg-green-900/20 p-4 rounded">
-                  <p className="text-green-300">
-                    Your email has been intelligently crafted based on your interactions! The {selectedCharacter}{" "}
-                    personality has been applied, and your mini-game performance has influenced the tone and content.
-                  </p>
-                  <div className="mt-4 text-sm text-green-500">
-                    • Professional formatting: ✓<br />• Personality quirks added: ✓<br />• Appropriate level of chaos:
-                    ✓<br />• Ready to send to your REAL inbox: ✓
+                <div className="border border-green-400 p-4 mb-4">
+                  <div className="text-sm text-green-500 mb-2">FROM: {selectedEmail.from}</div>
+                  <div className="text-lg mb-4">{selectedEmail.subject}</div>
+                  <div className="text-green-300 leading-relaxed">{characterResponses[selectedCharacter].response}</div>
+                </div>
+                <div className="text-center">
+                  <Button onClick={handleCharacterInteraction} className="bg-green-600 hover:bg-green-700 text-black">
+                    Get up from desk and procrastinate →
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {gameState === "character-select" && selectedCharacter && (
+              <div>
+                <h2 className="text-xl mb-4">🎮 Time to "Take a Break"</h2>
+                <div className="border border-green-400 p-4 mb-4">
+                  <h3 className="text-lg mb-2">{characterResponses[selectedCharacter].name}</h3>
+                  <p className="text-green-300 mb-4">{characterResponses[selectedCharacter].emailHelp}</p>
+                  <div className="text-yellow-400 text-sm mb-4">
+                    Available Mini-Game: {characterResponses[selectedCharacter].miniGame}
                   </div>
                 </div>
+                <div className="text-center">
+                  <Button onClick={playMiniGame} className="bg-red-600 hover:bg-red-700 text-white">
+                    Play Intentionally Frustrating Mini-Game
+                  </Button>
+                </div>
               </div>
+            )}
+
+            {gameState === "mini-game" && selectedCharacter && (
               <div className="text-center">
-                <Button onClick={sendEmail} className="bg-blue-600 hover:bg-blue-700 text-white">
-                  Send Email to Real Inbox! 📧
+                <h2 className="text-xl mb-4">🎯 {characterResponses[selectedCharacter].miniGame}</h2>
+                <div className="border border-red-400 p-8 mb-4 bg-red-900/10">
+                  <div className="text-6xl mb-4">🎮</div>
+                  <div className="text-red-400 mb-4">Playing intentionally buggy mini-game...</div>
+                  <div className="text-sm text-red-300">
+                    Controls are laggy, hitboxes are broken, and you're losing SAD coins!
+                  </div>
+                  <div className="mt-4 animate-pulse">Loading frustration... Please wait...</div>
+                </div>
+                <div className="text-yellow-400 text-sm">
+                  This is designed to be annoying so you'll want to go back to writing emails!
+                </div>
+              </div>
+            )}
+
+            {gameState === "writing" && (
+              <div>
+                <h2 className="text-xl mb-4">✍️ Email Composition</h2>
+                <div className="border border-green-400 p-4 mb-4">
+                  <div className="text-sm text-green-500 mb-2">
+                    AI Assistant ({selectedCharacter?.toUpperCase()}) is helping you write...
+                  </div>
+                  <div className="bg-green-900/20 p-4 rounded">
+                    <p className="text-green-300">
+                      Your email has been intelligently crafted based on your interactions! The {selectedCharacter}{" "}
+                      personality has been applied, and your mini-game performance has influenced the tone and content.
+                    </p>
+                    <div className="mt-4 text-sm text-green-500">
+                      • Professional formatting: ✓<br />• Personality quirks added: ✓<br />• Appropriate level of chaos:
+                      ✓<br />• Ready to send to your REAL inbox: ✓
+                    </div>
+                  </div>
+                </div>
+                <div className="text-center">
+                  <Button onClick={sendEmail} className="bg-blue-600 hover:bg-blue-700 text-white">
+                    Send Email to Real Inbox! 📧
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {gameState === "sent" && (
+              <div className="text-center">
+                <h2 className="text-2xl mb-4 text-green-400">🎉 SUCCESS!</h2>
+                <div className="border border-green-400 p-6 mb-4">
+                  <div className="text-lg mb-4">Email sent successfully!</div>
+                  <div className="text-green-300 mb-4">
+                    You just completed a real task while thinking you were procrastinating!
+                  </div>
+                  <div className="text-yellow-400 text-sm mb-4">
+                    <strong>THE META-GAME REVEALED:</strong> This entire experience was a commitment device that used
+                    gamification to overcome procrastination. You "wasted time" but actually got work done!
+                  </div>
+                  <div className="text-pink-400">+20 FEELS earned for productivity through procrastination!</div>
+                </div>
+                <Button onClick={resetGame} className="bg-purple-600 hover:bg-purple-700 text-white">
+                  Write Another Email? 🔄
                 </Button>
               </div>
-            </div>
-          )}
+            )}
 
-          {gameState === "sent" && (
-            <div className="text-center">
-              <h2 className="text-2xl mb-4 text-green-400">🎉 SUCCESS!</h2>
-              <div className="border border-green-400 p-6 mb-4">
-                <div className="text-lg mb-4">Email sent successfully!</div>
-                <div className="text-green-300 mb-4">
-                  You just completed a real task while thinking you were procrastinating!
-                </div>
-                <div className="text-yellow-400 text-sm mb-4">
-                  <strong>THE META-GAME REVEALED:</strong> This entire experience was a commitment device that used
-                  gamification to overcome procrastination. You "wasted time" but actually got work done!
-                </div>
-                <div className="text-pink-400">+20 FEELS earned for productivity through procrastination!</div>
-              </div>
-              <Button onClick={resetGame} className="bg-purple-600 hover:bg-purple-700 text-white">
-                Write Another Email? 🔄
-              </Button>
-            </div>
-          )}
+            {gameState === "about" && <AboutPage onBack={() => setGameState("inbox")} />}
+          </div>
 
-          {gameState === "about" && <AboutPage onBack={() => setGameState("inbox")} />}
-        </div>
-
-        {/* Footer */}
-        <div className="text-center text-green-600 text-sm border-t-2 border-green-400 p-2">
-          <p>A productivity tool disguised as a procrastination game</p>
-          <p className="text-xs mt-1">Built for the intersection of game theory and behavioral economics</p>
-        </div>
-      </Card>
-    </CRTContainer>
+          {/* Footer */}
+          <div className="text-center text-green-600 text-sm border-t-2 border-green-400 p-2">
+            <p>A productivity tool disguised as a procrastination game</p>
+            <p className="text-xs mt-1">Built for the intersection of game theory and behavioral economics</p>
+          </div>
+        </Card>
+      </CRTContainer>
+    </>
   )
 }
