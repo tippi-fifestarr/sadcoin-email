@@ -44,7 +44,7 @@ contract MockVRFCoordinatorV2Plus {
     event RandomWordsRequested(uint256 requestId, address sender);
     
     function requestRandomWords(
-        VRFV2PlusClient.RandomWordsRequest calldata req
+        VRFV2PlusClient.RandomWordsRequest calldata /* req */
     ) external returns (uint256 requestId) {
         requestId = currentRequestId++;
         requestToSender[requestId] = msg.sender;
@@ -164,7 +164,7 @@ contract ConversionContractTest is Test {
         conversion.purchaseSadness{value: 0.1 ether}();
     }
     
-    function testCalculatePurchaseAmount() public {
+    function testCalculatePurchaseAmount() public view {
         uint256 ethAmount = 0.5 ether;
         (uint256 sadAmount, uint256 ethPriceUSD) = conversion.calculatePurchaseAmount(ethAmount);
         
@@ -325,7 +325,7 @@ contract ConversionContractTest is Test {
         assertEq(nextUpdateIn, 12 hours); // Half day remaining
     }
     
-    function testGetAllConversionRates() public {
+    function testGetAllConversionRates() public view {
         uint256[5] memory rates = conversion.getAllConversionRates();
         
         assertEq(rates[0], 11);
@@ -335,7 +335,7 @@ contract ConversionContractTest is Test {
         assertEq(rates[4], 420);
     }
     
-    function testCalculateConversion() public {
+    function testCalculateConversion() public view {
         uint256 feelsAmount = 555 * 10**18;
         uint256 sadAmount = conversion.calculateConversion(feelsAmount);
         
