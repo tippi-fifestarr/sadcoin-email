@@ -1,21 +1,23 @@
 import React, { useState } from "react"
 import { useAccount, useConnect, useDisconnect } from "wagmi"
-import { metaMask, walletConnect } from "wagmi/connectors"
-
-export const projectId = process.env.NEXT_PUBLIC_PROJECT_ID;
+import { metaMask } from "wagmi/connectors"
+import { useAppKit } from "@reown/appkit/react"
 
 export default function NavBar() {
   const { address, isConnected } = useAccount()
   const { connect, status, variables } = useConnect()
   const { disconnect } = useDisconnect()
+  const { open } = useAppKit()
   const [showWalletOptions, setShowWalletOptions] = useState(false)
 
   const handleConnectMetaMask = () => {
     connect({ connector: metaMask() })
     setShowWalletOptions(false)
   }
+
+  // For WalletConnect, use the AppKit modal
   const handleConnectWalletConnect = () => {
-    connect({ connector: walletConnect({ projectId }) })
+    open()
     setShowWalletOptions(false)
   }
 
@@ -105,9 +107,8 @@ export default function NavBar() {
                     cursor: "pointer",
                     textAlign: "left",
                   }}
-                  disabled={status === "pending" && variables?.connector?.name === "WalletConnect"}
                 >
-                  {status === "pending" && variables?.connector?.name === "WalletConnect" ? "Connecting..." : "WalletConnect"}
+                  WalletConnect
                 </button>
               </div>
             )}
