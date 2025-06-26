@@ -1,21 +1,33 @@
-import React, { useState } from "react"
-import { useAccount, useConnect, useDisconnect } from "wagmi"
+import React, { useState, useEffect } from "react"
+import { useAccount, useConnect, useDisconnect, useSwitchChain } from "wagmi"
 import { metaMask, walletConnect } from "wagmi/connectors"
+import { sepolia } from "wagmi/chains"
+import { DebugModal } from "./DebugModal"
 
 export const projectId = process.env.NEXT_PUBLIC_PROJECT_ID;
 
 export default function NavBar() {
-  const { address, isConnected } = useAccount()
+  const { address, isConnected, chain } = useAccount()
   const { connect, status, variables } = useConnect()
   const { disconnect } = useDisconnect()
+  const { switchChain } = useSwitchChain()
   const [showWalletOptions, setShowWalletOptions] = useState(false)
+
+  // Auto-switch to Sepolia when wallet connects
+  useEffect(() => {
+    if (isConnected && chain?.id !== sepolia.id) {
+      switchChain({ chainId: sepolia.id })
+    }
+  }, [isConnected, chain?.id, switchChain])
 
   const handleConnectMetaMask = () => {
     connect({ connector: metaMask() })
     setShowWalletOptions(false)
   }
   const handleConnectWalletConnect = () => {
-    connect({ connector: walletConnect({ projectId }) })
+    if (projectId) {
+      connect({ connector: walletConnect({ projectId }) })
+    }
     setShowWalletOptions(false)
   }
 
@@ -128,6 +140,7 @@ export default function NavBar() {
             >
               {address?.slice(0, 6)}...{address?.slice(-4)}
             </span>
+            <DebugModal />
             <button
               onClick={() => disconnect()}
               style={{
