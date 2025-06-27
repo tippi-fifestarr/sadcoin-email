@@ -37,9 +37,9 @@ createAppKit({
   projectId,
   networks,
   features: {
-    email: true,
-    socials: ['google', 'discord'],
-    emailShowWallets: false
+    email: false,
+    socials: ['google', 'discord', 'github'],
+    emailShowWallets: true,
   },
   allWallets: 'HIDE'
 })
