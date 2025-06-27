@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react"
 import { useAccount, useConnect, useDisconnect, useSwitchChain } from "wagmi"
 import { metaMask, walletConnect } from "wagmi/connectors"
 import { sepolia } from "wagmi/chains"
+import { useAppKit } from "@reown/appkit/react"
 import { DebugModal } from "./DebugModal"
 
 export const projectId = process.env.NEXT_PUBLIC_PROJECT_ID;
@@ -10,6 +11,7 @@ export default function NavBar() {
   const { address, isConnected, chain } = useAccount()
   const { connect, status, variables } = useConnect()
   const { disconnect } = useDisconnect()
+  const { open } = useAppKit()
 
   const { switchChain } = useSwitchChain()
 
@@ -29,11 +31,7 @@ export default function NavBar() {
 
   // For WalletConnect, use the AppKit modal
   const handleConnectWalletConnect = () => {
-
-    if (projectId) {
-      connect({ connector: walletConnect({ projectId }) })
-    }
-
+    open()
     setShowWalletOptions(false)
   }
 
