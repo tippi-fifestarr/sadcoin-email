@@ -10,7 +10,9 @@ export default function NavBar() {
   const { address, isConnected, chain } = useAccount()
   const { connect, status, variables } = useConnect()
   const { disconnect } = useDisconnect()
+
   const { switchChain } = useSwitchChain()
+
   const [showWalletOptions, setShowWalletOptions] = useState(false)
 
   // Auto-switch to Sepolia when wallet connects
@@ -24,10 +26,14 @@ export default function NavBar() {
     connect({ connector: metaMask() })
     setShowWalletOptions(false)
   }
+
+  // For WalletConnect, use the AppKit modal
   const handleConnectWalletConnect = () => {
+
     if (projectId) {
       connect({ connector: walletConnect({ projectId }) })
     }
+
     setShowWalletOptions(false)
   }
 
@@ -117,9 +123,8 @@ export default function NavBar() {
                     cursor: "pointer",
                     textAlign: "left",
                   }}
-                  disabled={status === "pending" && variables?.connector?.name === "WalletConnect"}
                 >
-                  {status === "pending" && variables?.connector?.name === "WalletConnect" ? "Connecting..." : "WalletConnect"}
+                  WalletConnect
                 </button>
               </div>
             )}
