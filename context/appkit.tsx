@@ -2,7 +2,7 @@
 
 import { createAppKit } from '@reown/appkit/react'
 import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
-import { mainnet } from '@reown/appkit/networks'
+import { mainnet, sepolia } from '@reown/appkit/networks'
 import { walletConnect, coinbaseWallet, injected } from 'wagmi/connectors'
 import { http, WagmiProvider, cookieToInitialState } from 'wagmi'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -27,7 +27,7 @@ const connectors = [
   coinbaseWallet({ appName: metadata.name, appLogoUrl: metadata.icons[0] })
 ]
 
-const networks = [mainnet]
+const networks = [mainnet, sepolia]
 
 const wagmiAdapter = new WagmiAdapter({
   transports: { [mainnet.id]: http() },

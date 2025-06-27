@@ -2,12 +2,20 @@
 import { useSwitchChain, useChainId } from "wagmi"
 import { sepolia } from "wagmi/chains"
 import { Button } from "@/components/ui/button"
+import { useEffect } from "react"
 
 export function NetworkSwitcher() {
   const chainId = useChainId()
   const { switchChain, isPending } = useSwitchChain()
   
   const isOnSepolia = chainId === sepolia.id
+  
+  // Auto-switch to Sepolia if not already on it and not pending
+  useEffect(() => {
+    if (!isOnSepolia && !isPending) {
+      switchChain({ chainId: sepolia.id })
+    }
+  }, [isOnSepolia, isPending, switchChain])
   
   if (isOnSepolia) {
     return (
