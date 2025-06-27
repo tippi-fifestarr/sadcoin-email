@@ -22,11 +22,10 @@ contract DeploySepoliaScript is Script {
     bytes32 constant DON_ID = keccak256("fun_ethereum_sepolia_1");
     
     // VRF Subscription ID (update with your actual subscription)
-    uint256 constant VRF_SUBSCRIPTION_ID = 1; // Update with actual subscription ID
+    uint256 constant VRF_SUBSCRIPTION_ID = 112471577075721091854264773675545125245900460458976497301714233269987091787170; // Update with actual subscription ID
     
     function run() external {
-        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
-        address deployer = vm.addr(deployerPrivateKey);
+        address deployer = msg.sender;
         
         console.log("Deploying SadCoin ecosystem to Sepolia testnet...");
         console.log("Deployer:", deployer);
@@ -35,7 +34,7 @@ contract DeploySepoliaScript is Script {
         require(block.chainid == 11155111, "This script is for Sepolia testnet only");
         require(deployer.balance >= 0.1 ether, "Insufficient ETH for deployment");
         
-        vm.startBroadcast(deployerPrivateKey);
+        vm.startBroadcast();
         
         // Step 1: Deploy the token contracts first
         console.log("\\n=== Deploying Token Contracts ===");
