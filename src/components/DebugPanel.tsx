@@ -37,8 +37,19 @@ export function DebugPanel() {
   
   // Purchase testing
   const [testEthAmount, setTestEthAmount] = useState("0.001")
-  const { data: purchasePreview } = usePurchaseCalculation(testEthAmount)
-  const { writeContract: purchaseSadness, isPending: isPurchasing } = usePurchaseSadness()
+  const isValidEthAmount = testEthAmount !== "" && !isNaN(Number(testEthAmount)) && Number(testEthAmount) > 0
+  const { data: purchasePreview } = usePurchaseCalculation(isValidEthAmount ? testEthAmount : "0")
+  const { write, isPending: isPurchasing } = usePurchaseSadness(isValidEthAmount ? testEthAmount : undefined)
+  let sadAmountStr = "0";
+  if (
+    purchasePreview &&
+    Array.isArray(purchasePreview) &&
+    purchasePreview.length === 2 &&
+    typeof purchasePreview[0] === 'bigint' &&
+    typeof purchasePreview[1] === 'bigint'
+  ) {
+    sadAmountStr = formatSADBalance(purchasePreview[0]);
+  }
   
   // Conversion testing
   const [testFeelsAmount, setTestFeelsAmount] = useState("111")
@@ -65,33 +76,23 @@ export function DebugPanel() {
     setLastAction(`Purchase confirmed at ${new Date().toLocaleTimeString()}`)
   })
 
-  const handlePurchaseTest = async () => {
+  const handlePurchaseTest = async (): Promise<void> => {
     if (!address || !canPurchase) {
       setStatus("❌ Cannot purchase: " + (!address ? "No wallet connected" : "In cooldown period"))
-      return
+      return;
     }
-    
     try {
       setStatus("Preparing purchase transaction...")
       setLastAction("Initiating purchase...")
-      
       console.log("Attempting purchase with:", {
         contract: SEPOLIA_CONTRACTS.ConversionContract,
         amount: testEthAmount,
         value: parseEther(testEthAmount).toString()
       })
-      
-      const result = await purchaseSadness({
-        address: SEPOLIA_CONTRACTS.ConversionContract,
-        abi: ConversionContract_ABI,
-        functionName: 'purchaseSadness',
-        value: parseEther(testEthAmount)
-      })
-      
-      console.log("Transaction result:", result)
+      await write?.()
+      console.log("Transaction sent!")
       setStatus("Transaction sent! Waiting for confirmation...")
       setLastAction("Transaction submitted to mempool")
-      
     } catch (error: unknown) {
       console.error("Purchase error:", error)
       const errorMsg = (error as Error).message?.includes('user rejected')
@@ -101,10 +102,10 @@ export function DebugPanel() {
         : (error as Error).message?.includes('execution reverted')
         ? "Contract execution failed - check requirements"
         : `Error: ${(error as Error).message}`
-      
       setStatus(`❌ ${errorMsg}`)
       setLastAction(`Failed: ${errorMsg}`)
     }
+    return;
   }
 
   const handleConversionTest = async () => {
@@ -164,16 +165,16 @@ export function DebugPanel() {
       {/* Token Balances */}
       <div className="mb-3">
         <div className="text-yellow-400">TOKEN BALANCES:</div>
-        <div>SAD Balance: {formatSADBalance(sadBalance as bigint)} SAD</div>
-        <div>FEELS Balance: {formatFEELSBalance(feelsBalance as bigint)} FEELS</div>
-        <div>Sadness Level: {(sadnessLevel as bigint)?.toString() || "0"}</div>
-        <div>Emotional Damage: {(emotionalDamage as bigint)?.toString() || "0"}</div>
+        <div>SAD Balance: {formatSADBalance(typeof sadBalance === 'bigint' ? sadBalance : BigInt(0))} SAD</div>
+        <div>FEELS Balance: {formatFEELSBalance(typeof feelsBalance === 'bigint' ? feelsBalance : BigInt(0))} FEELS</div>
+        <div>Sadness Level: {typeof sadnessLevel === 'bigint' ? sadnessLevel.toString() : "0"}</div>
+        <div>Emotional Damage: {typeof emotionalDamage === 'bigint' ? emotionalDamage.toString() : "0"}</div>
       </div>
 
       {/* Conversion Info */}
       <div className="mb-3">
         <div className="text-yellow-400">CONVERSION DATA:</div>
-        <div>Current Rate: {(conversionRate as bigint)?.toString() || "Loading..."} FEELS per SAD</div>
+        <div>Current Rate: {typeof conversionRate === 'bigint' ? conversionRate.toString() : "Loading..."} FEELS per SAD</div>
         <div>Purchase Cooldown: {formatCooldownTime(cooldownSeconds)}</div>
       </div>
 
@@ -191,11 +192,14 @@ export function DebugPanel() {
             placeholder="0.001"
           />
           <span>ETH →</span>
-          <span>{purchasePreview ? formatSADBalance((purchasePreview as [bigint, bigint])[0]) : "0"} SAD</span>
+          <span>{sadAmountStr} SAD</span>
+          {!isValidEthAmount && (
+            <span className="text-red-400 text-xs ml-2">Enter a valid ETH amount</span>
+          )}
         </div>
         <Button
           onClick={handlePurchaseTest}
-          disabled={!canPurchase || isPurchasing || isWrongNetwork || !testEthAmount}
+          disabled={!canPurchase || isPurchasing || isWrongNetwork || !isValidEthAmount}
           className="mt-2 bg-green-600 hover:bg-green-700 text-black text-xs px-3 py-1 h-auto"
         >
           {isPurchasing ? "Purchasing..." : canPurchase ? "🧪 TEST PURCHASE" : `Cooldown: ${formatCooldownTime(cooldownSeconds)}`}
