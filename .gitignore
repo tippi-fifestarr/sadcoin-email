@@ -43,3 +43,6 @@ next-env.d.ts
 # cursor rules
 .cursor/
 PRD.md
+
+# prompts
+./public/prompt/*
