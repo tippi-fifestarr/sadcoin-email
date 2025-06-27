@@ -1,11 +1,11 @@
 // Contract addresses deployed on Sepolia testnet
 export const SEPOLIA_CONTRACTS = {
-  SADCoin: "0x7845B4894F2b2D2475314215163D797D4395d8Fb",
-  FEELS: "0x1C25c8e0855952CaDF85898239D53B62719Fb2ab", 
-  StakingContract: "0x0f03aBf42014798fA0742befedf404100e07060D",
-  GameRewards: "0xdf8D2B48FC3007726d80cEf15c5CC41C6eEaDaE8",
-  ConversionContract: "0x61fBE2CDa9d2a41c7A09843106eBD55A43790F54",
-  NFTClaim: "0x9E23590b10AD7fb256ce7BBAEc1D2d1B39bD1f2F"
+  SADCoin: "0xace84066b7e68f636dac3c3438975de22cf4af20",
+  FEELS: "0xe5180fa5acaf05717d49bf2ec4f6fd0261db92b2",
+  StakingContract: "0xf62ab5625521f4a9883565b72ddc4f86098f1062",
+  GameRewards: "0x47bea96317ddcc926696f83db55389898493dbcd",
+  ConversionContract: "0x2dbfae1ff52735a145bbdfc0822085143bd462e3",
+  NFTClaim: "0x037feb654b637226b5503a237361d1c3b4de7b30"
 } as const;
 
 // Minimal ABIs for immediate testing - extracted from contract interfaces

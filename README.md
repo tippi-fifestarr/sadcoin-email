@@ -41,9 +41,12 @@ Get a free Project ID from [WalletConnect Cloud](https://cloud.walletconnect.com
 ## 🔗 Blockchain Integration
 
 ### Smart Contracts (Sepolia Testnet)
-- **SADCoin Token**: `0x7845B4894F2b2D2475314215163D797D4395d8Fb`
-- **FEELS Token**: `0x4A679253410272dd5232B3Ff7cF5dbB88f295319`
-- **Conversion Contract**: `0x61fBE2CDa9d2a41c7A09843106eBD55A43790F54`
+- **SADCoin Token**: `0xace84066b7e68f636dac3c3438975de22cf4af20`
+- **FEELS Token**: `0xe5180fa5acaf05717d49bf2ec4f6fd0261db92b2`
+- **StakingContract**: `0xf62ab5625521f4a9883565b72ddc4f86098f1062`
+- **GameRewards**: `0x47bea96317ddcc926696f83db55389898493dbcd`
+- **ConversionContract**: `0x2dbfae1ff52735a145bbdfc0822085143bd462e3`
+- **NFTClaim**: `0x037feb654b637226b5503a237361d1c3b4de7b30`
 
 ### Key Features
 - **Auto-Network Switching**: Automatically switches to Sepolia on wallet connection
