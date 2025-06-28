@@ -20,6 +20,7 @@ import {
 } from "@/hooks/useContracts"
 import { useReadContract } from "wagmi"
 import { SEPOLIA_CONTRACTS } from "@/lib/contracts"
+import { generateEmail, EmailGenerationResponse, EmailContent } from "@/lib/gemini"
 
 // Import screen components
 import {
@@ -36,7 +37,9 @@ import {
   CharacterSelectScreen,
   MiniGameScreen,
   WritingScreen,
-  SentScreen
+  SentScreen,
+  AgentResponsesScreen,
+  EmailViewScreen
 } from "./components/screens"
 
 export default function Component() {
@@ -47,6 +50,11 @@ export default function Component() {
   const [selectedEmail, setSelectedEmail] = useState<Email | null>(null)
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null)
   const [gameProgress, setGameProgress] = useState(0)
+  const [generatedEmails, setGeneratedEmails] = useState<EmailGenerationResponse | null>(null)
+  const [isGeneratingEmail, setIsGeneratingEmail] = useState(false)
+  const [userSadInput, setUserSadInput] = useState("")
+  const [selectedEmailContent, setSelectedEmailContent] = useState<EmailContent | null>(null)
+  const [selectedEmailSender, setSelectedEmailSender] = useState<string>("")
 
   // Web3 token balances
   const { data: sadBalance, error: sadError, isLoading: sadLoading } = useSADCoinBalance(address)
@@ -207,10 +215,59 @@ export default function Component() {
     setGameState("loading-c")
   }
 
-  const handleEmailSubmit = (userInput: string) => {
+  const handleEmailSubmit = async (userInput: string) => {
     console.log("Email submitted:", userInput)
-    // TODO: Implement email submission logic
-    setGameState("inbox")
+    
+    setUserSadInput(userInput)
+    setIsGeneratingEmail(true)
+    
+    try {
+      const emailResponse = await generateEmail({
+        userInput
+      })
+
+      if (emailResponse.success) {
+        setGeneratedEmails(emailResponse)
+        setGameState("agent-responses")
+      } else {
+        console.error("Failed to generate emails:", emailResponse.error)
+        // Fallback to agent responses with error messages
+        setGeneratedEmails({
+          agentInitialEmail: { subject: "Error", body: "Failed to generate agent email" },
+          officerInitialEmail: { subject: "Error", body: "Failed to generate officer email" },
+          monkeyInitialEmail: { subject: "Error", body: "Failed to generate monkey email" },
+          success: false,
+          error: emailResponse.error
+        })
+        setGameState("agent-responses")
+      }
+    } catch (error) {
+      console.error("Error in email generation:", error)
+      setGeneratedEmails({
+        agentInitialEmail: { subject: "Error", body: "Failed to generate agent email" },
+        officerInitialEmail: { subject: "Error", body: "Failed to generate officer email" },
+        monkeyInitialEmail: { subject: "Error", body: "Failed to generate monkey email" },
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error"
+      })
+      setGameState("agent-responses")
+    } finally {
+      setIsGeneratingEmail(false)
+    }
+  }
+
+  const handleEmailSelect = (email: EmailContent, sender: string) => {
+    setSelectedEmailContent(email)
+    setSelectedEmailSender(sender)
+    setGameState("email-view")
+  }
+
+  const handleEmailViewBack = () => {
+    setGameState("agent-responses")
+  }
+
+  const handleEmailViewContinue = () => {
+    setGameState("writing")
   }
 
   const playMiniGame = () => {
@@ -226,6 +283,11 @@ export default function Component() {
     setSelectedEmail(null)
     setSelectedCharacter(null)
     setGameProgress(0)
+    setGeneratedEmails(null)
+    setIsGeneratingEmail(false)
+    setUserSadInput("")
+    setSelectedEmailContent(null)
+    setSelectedEmailSender("")
   }
 
   // Render the appropriate screen based on game state
@@ -308,9 +370,11 @@ export default function Component() {
         ) : null
 
       case "writing":
-        return selectedCharacter ? (
+        return selectedEmailContent ? (
           <WritingScreen
             selectedCharacter={selectedCharacter}
+            generatedEmail={selectedEmailContent}
+            isGeneratingEmail={false}
             onSendEmail={sendEmail}
           />
         ) : null
@@ -325,6 +389,27 @@ export default function Component() {
       case "about":
         return <AboutPage onBack={() => setGameState("inbox")} />
 
+      case "agent-responses":
+        return generatedEmails ? (
+          <AgentResponsesScreen
+            userSadInput={userSadInput}
+            agentInitialEmail={generatedEmails.agentInitialEmail}
+            officerInitialEmail={generatedEmails.officerInitialEmail}
+            monkeyInitialEmail={generatedEmails.monkeyInitialEmail}
+            onSelectEmail={handleEmailSelect}
+          />
+        ) : null
+
+      case "email-view":
+        return selectedEmailContent ? (
+          <EmailViewScreen
+            email={selectedEmailContent}
+            sender={selectedEmailSender}
+            onBack={handleEmailViewBack}
+            onContinue={handleEmailViewContinue}
+          />
+        ) : null
+
       default:
         return null
     }
@@ -332,30 +417,25 @@ export default function Component() {
 
   return (
     <>
-      <NavBar />
+      <NavBar 
+        gameState={gameState}
+        debugInfo={{
+          chainId,
+          address,
+          isConnected,
+          isOnSepolia: chainId === 11155111,
+          sadBalance: sadBalance?.toString(),
+          directSadBalance: directSadBalance?.toString(),
+          sadLoading,
+          directSadLoading,
+          sadError,
+          directSadError,
+          feelsBalance: feelsBalance?.toString(),
+          feelsLoading
+        }}
+      />
       <CRTContainer>
         <Card className="border-2 border-green-400 bg-black text-green-400 w-full h-full flex flex-col">
-          {/* Debug info */}
-          <div className="text-xs text-red-400 p-1">Current State: {gameState}</div>
-          {isConnected && (
-            <div className="text-xs text-blue-400 p-1">
-              Wallet: {address?.slice(0, 8)}...{address?.slice(-6)} | 
-              Chain: {chainId} {chainId === 11155111 ? "✅ Sepolia" : "❌ Wrong Network"} | 
-              SAD Raw: {sadLoading ? "Loading..." : typeof sadBalance === 'bigint' ? sadBalance.toString() : 'undefined'} | 
-              Direct: {directSadLoading ? "Loading..." : typeof directSadBalance === 'bigint' ? directSadBalance.toString() : 'undefined'}
-              {sadError && ` | Hook Error: ${sadError.message}`}
-              {directSadError && ` | Direct Error: ${directSadError.message}`}
-              {chainId !== 11155111 && (
-                <button 
-                  onClick={() => switchChain({ chainId: sepolia.id })}
-                  className="ml-2 bg-yellow-600 hover:bg-yellow-700 text-black px-2 py-1 rounded text-xs"
-                >
-                  Switch to Sepolia
-                </button>
-              )}
-            </div>
-          )}
-          
           {/* Header */}
           <div className="border-b-2 border-green-400 p-4 bg-black">
             <div className="flex justify-between items-center">

@@ -1,35 +1,49 @@
 import { Button } from '@/components/ui/button'
 import { Character } from '@/types/game'
+import { EmailContent } from '@/lib/gemini'
 
 interface WritingScreenProps {
   selectedCharacter: Character | null
+  generatedEmail: EmailContent | null
+  isGeneratingEmail: boolean
   onSendEmail: () => void
 }
 
-export function WritingScreen({ selectedCharacter, onSendEmail }: WritingScreenProps) {
+export function WritingScreen({ 
+  selectedCharacter, 
+  generatedEmail, 
+  isGeneratingEmail, 
+  onSendEmail 
+}: WritingScreenProps) {
   return (
     <div>
       <h2 className="text-xl mb-4">✍️ Email Composition</h2>
-      <div className="border border-green-400 p-4 mb-4">
-        <div className="text-sm text-green-500 mb-2">
-          AI Assistant ({selectedCharacter?.toUpperCase()}) is helping you write...
-        </div>
-        <div className="bg-green-900/20 p-4 rounded">
-          <p className="text-green-300">
-            Your email has been intelligently crafted based on your interactions! The {selectedCharacter}{" "}
-            personality has been applied, and your mini-game performance has influenced the tone and content.
-          </p>
-          <div className="mt-4 text-sm text-green-500">
-            • Professional formatting: ✓<br />• Personality quirks added: ✓<br />• Appropriate level of chaos:
-            ✓<br />• Ready to send to your REAL inbox: ✓
+      
+      {isGeneratingEmail && (
+        <div className="border border-yellow-400 p-4 mb-4">
+          <div className="text-sm text-yellow-500 mb-2">
+            AI Assistant ({selectedCharacter?.toUpperCase()}) is crafting your email...
           </div>
+          <div className="text-xs text-yellow-600">Please wait while we generate your email...</div>
         </div>
-      </div>
-      <div className="text-center">
-        <Button onClick={onSendEmail} className="bg-blue-600 hover:bg-blue-700 text-white">
-          Send Email to Real Inbox! 📧
-        </Button>
-      </div>
+      )}
+
+      {generatedEmail && (
+        <div className="border border-green-400 p-4 mb-4">
+          <div className="text-sm text-green-500 mb-2">Generated Email:</div>
+          <div className="text-lg mb-2 font-bold">{generatedEmail.subject}</div>
+          <div className="text-green-300 leading-relaxed whitespace-pre-wrap mb-4">{generatedEmail.body}</div>
+          <Button onClick={onSendEmail} className="bg-green-600 hover:bg-green-700 text-black">
+            Send Email →
+          </Button>
+        </div>
+      )}
+
+      {!generatedEmail && !isGeneratingEmail && (
+        <div className="text-center text-yellow-400">
+          No email content available. Please try again.
+        </div>
+      )}
     </div>
   )
 } 
