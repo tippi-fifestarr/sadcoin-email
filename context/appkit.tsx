@@ -30,7 +30,10 @@ const connectors = [
 const networks = [mainnet, sepolia]
 
 const wagmiAdapter = new WagmiAdapter({
-  transports: { [mainnet.id]: http() },
+  transports: { 
+    [mainnet.id]: http(),
+    [sepolia.id]: http('https://sepolia.drpc.org')
+  },
   connectors,
   projectId,
   networks
@@ -42,7 +45,7 @@ const config = wagmiAdapter.wagmiConfig
 createAppKit({
   adapters: [wagmiAdapter],
   projectId,
-  networks,
+  networks: [mainnet, sepolia],
   metadata,
   features: {
     email: false,

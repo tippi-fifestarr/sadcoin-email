@@ -16,6 +16,12 @@ export default function NavBar() {
   const { switchChain } = useSwitchChain()
 
   const [showWalletOptions, setShowWalletOptions] = useState(false)
+  const [isClient, setIsClient] = useState(false)
+
+  // Prevent hydration mismatch
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
 
   // Auto-switch to Sepolia when wallet connects
   useEffect(() => {
@@ -55,7 +61,9 @@ export default function NavBar() {
         SADCOIN TERMINAL
       </div>
       <div style={{ position: "relative" }}>
-        {!isConnected ? (
+        {!isClient ? (
+          <div style={{ height: "40px", width: "120px" }}></div> // Placeholder to prevent layout shift
+        ) : !isConnected ? (
           <>
             <button
               onClick={() => setShowWalletOptions((v) => !v)}

@@ -58,10 +58,10 @@ export const SEPOLIA_CONFIG = {
   },
   rpcUrls: {
     default: {
-      http: ["https://sepolia.infura.io/v3/"],
+      http: ["https://sepolia.drpc.org"],
     },
     public: {
-      http: ["https://sepolia.infura.io/v3/"],
+      http: ["https://sepolia.drpc.org"],
     },
   },
   blockExplorers: {
