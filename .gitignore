@@ -45,4 +45,4 @@ next-env.d.ts
 PRD.md
 
 # prompts
-./public/prompt/*
+../public/prompt/
