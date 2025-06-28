@@ -1,20 +1,42 @@
 "use client"
-import { useReadContract, useWriteContract, useWatchContractEvent, usePrepareContractWrite, useContractWrite, useSimulateContract } from "wagmi"
+import { useReadContract, useWriteContract, useWatchContractEvent, useContractWrite, useSimulateContract } from "wagmi"
 import { parseEther, formatEther } from "viem"
 import { SEPOLIA_CONTRACTS, SADCoin_ABI, FEELS_ABI, ConversionContract_ABI } from "@/lib/contracts"
 
 // SADCoin contract hooks
 export function useSADCoinBalance(address?: `0x${string}`) {
-  return useReadContract({
+  const result = useReadContract({
     address: SEPOLIA_CONTRACTS.SADCoin,
-    abi: SADCoin_ABI,
+    abi: [
+      {
+        "inputs": [{"internalType": "address", "name": "account", "type": "address"}],
+        "name": "balanceOf",
+        "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+        "stateMutability": "view",
+        "type": "function"
+      }
+    ],
     functionName: 'balanceOf',
     args: address ? [address] : undefined,
     query: { 
       enabled: !!address,
-      refetchInterval: 5000 // Refresh every 5 seconds
+      refetchInterval: 5000, // Refresh every 5 seconds
+      retry: 1,
+      retryDelay: 1000
     }
   });
+
+  // Debug logging
+  if (result.error) {
+    console.error("SADCoin balance error:", {
+      error: result.error.message,
+      address: SEPOLIA_CONTRACTS.SADCoin,
+      userAddress: address,
+      fullError: result.error
+    });
+  }
+
+  return result;
 }
 
 export function useSadnessLevel(address?: `0x${string}`) {
@@ -51,16 +73,38 @@ export function useSADCoinInfo() {
 
 // FEELS contract hooks
 export function useFEELSBalance(address?: `0x${string}`) {
-  return useReadContract({
+  const result = useReadContract({
     address: SEPOLIA_CONTRACTS.FEELS,
-    abi: FEELS_ABI,
+    abi: [
+      {
+        "inputs": [{"internalType": "address", "name": "account", "type": "address"}],
+        "name": "balanceOf",
+        "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+        "stateMutability": "view",
+        "type": "function"
+      }
+    ],
     functionName: 'balanceOf',
     args: address ? [address] : undefined,
     query: { 
       enabled: !!address,
-      refetchInterval: 5000
+      refetchInterval: 5000,
+      retry: 1,
+      retryDelay: 1000
     }
   });
+
+  // Debug logging
+  if (result.error) {
+    console.error("FEELS balance error:", {
+      error: result.error.message,
+      address: SEPOLIA_CONTRACTS.FEELS,
+      userAddress: address,
+      fullError: result.error
+    });
+  }
+
+  return result;
 }
 
 export function useEmotionalDamage(address?: `0x${string}`) {
@@ -155,7 +199,7 @@ export function usePurchaseSadness(ethAmount?: string | bigint, args: any[] = []
     functionName: 'purchaseSadness',
     args,
     value,
-    query: { enabled: value !== undefined && (typeof value === 'bigint' ? value > 0n : Number(value) > 0) },
+    query: { enabled: value !== undefined && (typeof value === 'bigint' ? value > BigInt(0) : Number(value) > 0) },
   });
   const { writeContract, isPending, data, error: writeError } = useWriteContract();
   const write = simulate.data?.request
@@ -205,13 +249,23 @@ export function useWatchSadnessPurchases(address?: `0x${string}`, onPurchase?: (
 
 // Utility functions for formatting
 export function formatSADBalance(balance?: bigint): string {
-  if (!balance) return "0.0";
-  return parseFloat(formatEther(balance)).toFixed(2);
+  try {
+    if (!balance) return "0.0";
+    return parseFloat(formatEther(balance)).toFixed(2);
+  } catch (error) {
+    console.error("Error formatting SAD balance:", error, balance);
+    return "0.0";
+  }
 }
 
 export function formatFEELSBalance(balance?: bigint): string {
-  if (!balance) return "0.0";
-  return parseFloat(formatEther(balance)).toFixed(2);
+  try {
+    if (!balance) return "0.0";
+    return parseFloat(formatEther(balance)).toFixed(2);
+  } catch (error) {
+    console.error("Error formatting FEELS balance:", error, balance);
+    return "0.0";
+  }
 }
 
 export function calculateCooldownRemaining(lastPurchaseTime?: bigint): number {

@@ -45,4 +45,7 @@ next-env.d.ts
 PRD.md
 
 # prompts
-../public/prompt/
+public/prompt/
+
+# updates
+UPDATE.md

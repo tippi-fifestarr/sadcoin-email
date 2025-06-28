@@ -7,7 +7,25 @@ import { DebugModal } from "./DebugModal"
 
 export const projectId = process.env.NEXT_PUBLIC_PROJECT_ID;
 
-export default function NavBar() {
+interface NavBarProps {
+  gameState?: string
+  debugInfo?: {
+    chainId?: number
+    sadBalance?: string
+    directSadBalance?: string
+    sadLoading?: boolean
+    directSadLoading?: boolean
+    sadError?: Error | null
+    directSadError?: Error | null
+    address?: string
+    isOnSepolia?: boolean
+    feelsBalance?: string
+    feelsLoading?: boolean
+    isConnected?: boolean
+  }
+}
+
+export default function NavBar({ gameState, debugInfo }: NavBarProps) {
   const { address, isConnected, chain } = useAccount()
   const { connect, status, variables } = useConnect()
   const { disconnect } = useDisconnect()
@@ -16,6 +34,12 @@ export default function NavBar() {
   const { switchChain } = useSwitchChain()
 
   const [showWalletOptions, setShowWalletOptions] = useState(false)
+  const [isClient, setIsClient] = useState(false)
+
+  // Prevent hydration mismatch
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
 
   // Auto-switch to Sepolia when wallet connects
   useEffect(() => {
@@ -49,13 +73,94 @@ export default function NavBar() {
         borderBottom: "2px solid #39ff14",
         boxShadow: "0 2px 8px #000a",
         zIndex: 10,
+        gap: "2rem"
       }}
     >
-      <div style={{ fontWeight: "bold", fontSize: "1.2rem", letterSpacing: "2px" }}>
-        SADCOIN TERMINAL
+      <div style={{ display: "flex", alignItems: "center", gap: "2rem", flex: 1 }}>
+        <div style={{ fontWeight: "bold", fontSize: "1.2rem", letterSpacing: "2px", flexShrink: 0 }}>
+          SADCOIN TERMINAL
+        </div>
+        
+        {/* Debug Information */}
+        {debugInfo && (
+          <div className="fixed top-28 right-4 bg-black/80 border border-green-400 p-3 rounded text-xs text-green-400 font-mono z-50 max-w-xs">
+            <div className="font-bold mb-2 text-green-300 border-b border-green-400 pb-1">DEBUG INFO</div>
+            
+            {/* Game State */}
+            {gameState && (
+              <div className="mb-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-green-300">State:</span>
+                  <span className="text-green-400">{gameState}</span>
+                </div>
+              </div>
+            )}
+            
+            {/* Wallet and Chain Group */}
+            {(debugInfo.address || debugInfo.chainId) && (
+              <div className="mb-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-green-300">Wallet:</span>
+                  <span className="text-green-400">
+                    {debugInfo.address ? `${debugInfo.address.slice(0, 6)}...${debugInfo.address.slice(-4)}` : 'Not Connected'}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-green-300">Chain:</span>
+                  <span className="text-green-400">
+                    {debugInfo.chainId} {debugInfo.isOnSepolia ? '(Sepolia)' : ''}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* SAD and Direct Balance Group */}
+            {(debugInfo.sadBalance || debugInfo.directSadBalance) && (
+              <div className="mb-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-green-300">SAD:</span>
+                  <span className="text-green-400">
+                    {debugInfo.sadLoading ? "..." : debugInfo.sadBalance || "0.0"}
+                  </span>
+                </div>
+                {debugInfo.directSadBalance && (
+                  <div className="flex justify-between items-center">
+                    <span className="text-green-300">Direct:</span>
+                    <span className="text-green-400">
+                      {debugInfo.directSadLoading ? "..." : debugInfo.directSadBalance}
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* FEELS Balance */}
+            {debugInfo.feelsBalance && (
+              <div className="mb-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-green-300">FEELS:</span>
+                  <span className="text-green-400">
+                    {debugInfo.feelsLoading ? "..." : debugInfo.feelsBalance}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Connection Status */}
+            <div className="flex justify-between items-center">
+              <span className="text-green-300">Status:</span>
+              <span className={`${debugInfo.isConnected ? 'text-green-400' : 'text-red-400'}`}>
+                {debugInfo.isConnected ? 'Connected' : 'Disconnected'}
+              </span>
+            </div>
+          </div>
+        )}
       </div>
-      <div style={{ position: "relative" }}>
-        {!isConnected ? (
+      
+      <div style={{ position: "relative", flexShrink: 0 }}>
+        {!isClient ? (
+          <div style={{ height: "40px", width: "120px" }}></div> // Placeholder to prevent layout shift
+        ) : !isConnected ? (
           <>
             <button
               onClick={() => setShowWalletOptions((v) => !v)}
