@@ -43,7 +43,7 @@ import {
 export default function Component() {
   const { address, isConnected } = useAccount()
   const chainId = useChainId()
-  const [gameState, setGameState] = useState<GameState>("boot")
+  const [gameState, setGameState] = useState<GameState>("login")
   const [selectedEmail, setSelectedEmail] = useState<Email | null>(null)
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null)
   const [generatedEmails, setGeneratedEmails] = useState<EmailGenerationResponse | null>(null)

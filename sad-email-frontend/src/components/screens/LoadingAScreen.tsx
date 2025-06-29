@@ -33,12 +33,12 @@ export function LoadingAScreen({ onContinue }: LoadingAScreenProps) {
           console.log("Adding character:", JSON.stringify(char), "at position:", currentChar)
           setLoadingText(prev => prev + char)
           currentChar++
-          setTimeout(typeText, 100) // Type speed
+          setTimeout(typeText, 20) // Much faster type speed
         } else {
           console.log("Line complete, moving to next")
           currentIndex++
           currentChar = 0
-          setTimeout(typeText, 200) // Line delay
+          setTimeout(typeText, 50) // Much faster line delay
         }
       } else {
         console.log("Animation complete")

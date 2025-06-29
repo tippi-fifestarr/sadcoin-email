@@ -39,18 +39,18 @@ export function LoadingCScreen({ onComplete }: LoadingCScreenProps) {
           const char = currentLine[currentChar]
           setLoadingCText(prev => prev + char)
           currentChar++
-          setTimeout(typeText, 50) // Faster typing for longer sequence
+          setTimeout(typeText, 15) // Much faster typing for longer sequence
         } else {
           currentIndex++
           currentChar = 0
-          setTimeout(typeText, 100) // Line delay
+          setTimeout(typeText, 30) // Much faster line delay
         }
       } else {
         // Animation complete
         setLoadingCComplete(true)
         setTimeout(() => {
           onComplete()
-        }, 1000) // Wait a bit before transitioning
+        }, 300) // Much shorter wait before transitioning
       }
     }
 
