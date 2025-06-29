@@ -462,10 +462,11 @@ export default function Component() {
         {/* Loading containers and email input container - now in main flow */}
         <LoadingContainer gameState={gameState} />
         
-        {gameState === "email-input" && (
+        {(gameState === "email-input" || gameState === "water-cooler") && (
           <EmailInputContainer 
             onSubmit={handleEmailSubmit} 
-            onWaterCooler={handleWaterCooler}
+            onWaterCooler={gameState === "water-cooler" ? handleBackFromWaterCooler : handleWaterCooler}
+            isWaterCoolerMode={gameState === "water-cooler"}
           />
         )}
         

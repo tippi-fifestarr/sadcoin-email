@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 interface EmailInputScreenProps {
   onSubmit: (userInput: string) => void
   onWaterCooler?: () => void
+  isWaterCoolerMode?: boolean
 }
 
 export function EmailInputScreen({ onSubmit }: EmailInputScreenProps) {
@@ -28,7 +29,7 @@ export function EmailInputScreen({ onSubmit }: EmailInputScreenProps) {
 }
 
 // Container component for the footer area
-export function EmailInputContainer({ onSubmit, onWaterCooler }: EmailInputScreenProps) {
+export function EmailInputContainer({ onSubmit, onWaterCooler, isWaterCoolerMode }: EmailInputScreenProps) {
   const [userSadInput, setUserSadInput] = useState('')
 
   const handleSubmit = () => {
@@ -83,7 +84,7 @@ export function EmailInputContainer({ onSubmit, onWaterCooler }: EmailInputScree
               onClick={onWaterCooler}
               className="bg-blue-600 hover:bg-blue-700 text-white text-xs px-2 py-1"
             >
-              💧 WATER COOLER
+              {isWaterCoolerMode ? "🚪 RETURN" : "💧 WATER COOLER"}
             </Button>
           </div>
         </div>
