@@ -47,6 +47,50 @@ export const ConversionContract_ABI = [
   "event FeelsConvertedToSad(address indexed converter, uint256 feelsAmount, uint256 sadAmount, uint256 rate)"
 ] as const;
 
+export const GameRewards_ABI = [
+  "function startGameSession() returns (uint256)",
+  "function completeGame(uint256 sessionId, uint256 score)",
+  "function getPlayerSessions(address player) view returns (uint256[])",
+  "function getSessionDetails(uint256 sessionId) view returns (address player, uint256 score, uint256 timestamp, bool rewarded, uint256 vrfRequestId)",
+  "function isPendingReward(uint256 requestId) view returns (bool)",
+  "function getStats() view returns (uint256 totalGamesPlayed, uint256 totalFeelsDistributed, uint256 activeSessions)",
+  "event GameSessionStarted(address indexed player, uint256 sessionId)",
+  "event GameCompleted(address indexed player, uint256 sessionId, uint256 score)",
+  "event SadRewardCalculated(address indexed player, uint256 baseReward, uint256 multiplier, uint256 finalReward)"
+] as const;
+
+export const StakingContract_ABI = [
+  "function stakeSadness(uint256 amount)",
+  "function requestUnstake()",
+  "function unstakeSadness()",
+  "function harvestFeelings()",
+  "function pendingRewards(address staker) view returns (uint256)",
+  "function stakes(address) view returns (uint256 amount, uint256 rewardDebt, uint256 lastRewardTime, uint256 unstakeRequestTime, bool unstakeRequested)",
+  "function totalStaked() view returns (uint256)",
+  "function getStakerCount() view returns (uint256)",
+  "function REWARD_RATE() view returns (uint256)",
+  "function MINIMUM_STAKE() view returns (uint256)",
+  "function UNSTAKE_DELAY() view returns (uint256)",
+  "event SadnessStaked(address indexed staker, uint256 amount)",
+  "event FeelingsHarvested(address indexed staker, uint256 amount)",
+  "event UnstakeRequested(address indexed staker, uint256 amount)",
+  "event SadnessUnstaked(address indexed staker, uint256 amount)"
+] as const;
+
+export const NFTClaim_ABI = [
+  "function requestClaim(uint8 achievement, string emailHash, string verificationData)",
+  "function getAchievementInfo(uint8 achievement) view returns (string name, string description, uint256 sadnessLevel)",
+  "function hasAchievement(address user, uint8 achievement) view returns (bool)",
+  "function getUserTotalSadness(address user) view returns (uint256)",
+  "function balanceOf(address owner) view returns (uint256)",
+  "function tokenOfOwnerByIndex(address owner, uint256 index) view returns (uint256)",
+  "function getTokenMetadata(uint256 tokenId) view returns (tuple(uint8 achievement, uint256 timestamp, string emailHash, uint256 sadnessLevel, bool verified))",
+  "function nextTokenId() view returns (uint256)",
+  "function MAX_SUPPLY() view returns (uint256)",
+  "event ClaimRequested(address indexed claimer, bytes32 requestId, uint8 achievement)",
+  "event NFTClaimed(address indexed claimer, uint256 tokenId, uint8 achievement)"
+] as const;
+
 // Network configuration
 export const SEPOLIA_CONFIG = {
   chainId: 11155111,

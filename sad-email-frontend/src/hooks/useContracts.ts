@@ -1,7 +1,7 @@
 "use client"
 import { useReadContract, useWriteContract, useWatchContractEvent, useContractWrite, useSimulateContract } from "wagmi"
 import { parseEther, formatEther } from "viem"
-import { SEPOLIA_CONTRACTS, SADCoin_ABI, FEELS_ABI, ConversionContract_ABI } from "@/lib/contracts"
+import { SEPOLIA_CONTRACTS, SADCoin_ABI, FEELS_ABI, ConversionContract_ABI, GameRewards_ABI, StakingContract_ABI, NFTClaim_ABI } from "@/lib/contracts"
 
 // SADCoin contract hooks
 export function useSADCoinBalance(address?: `0x${string}`) {
@@ -286,3 +286,235 @@ export function formatCooldownTime(seconds: number): string {
   
   return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
 }
+
+// GameRewards contract hooks
+export function useStartGameSession() {
+  return useWriteContract();
+}
+
+export function useCompleteGame() {
+  return useWriteContract();
+}
+
+export function usePlayerSessions(address?: `0x${string}`) {
+  return useReadContract({
+    address: SEPOLIA_CONTRACTS.GameRewards,
+    abi: GameRewards_ABI,
+    functionName: 'getPlayerSessions',
+    args: address ? [address] : undefined,
+    query: { enabled: !!address }
+  });
+}
+
+export function useSessionDetails(sessionId?: bigint) {
+  return useReadContract({
+    address: SEPOLIA_CONTRACTS.GameRewards,
+    abi: GameRewards_ABI,
+    functionName: 'getSessionDetails',
+    args: sessionId !== undefined ? [sessionId] : undefined,
+    query: { enabled: sessionId !== undefined }
+  });
+}
+
+export function useGameStats() {
+  return useReadContract({
+    address: SEPOLIA_CONTRACTS.GameRewards,
+    abi: GameRewards_ABI,
+    functionName: 'getStats'
+  });
+}
+
+// StakingContract hooks
+export function useStakeInfo(address?: `0x${string}`) {
+  return useReadContract({
+    address: SEPOLIA_CONTRACTS.StakingContract,
+    abi: StakingContract_ABI,
+    functionName: 'stakes',
+    args: address ? [address] : undefined,
+    query: { enabled: !!address }
+  });
+}
+
+export function usePendingRewards(address?: `0x${string}`) {
+  return useReadContract({
+    address: SEPOLIA_CONTRACTS.StakingContract,
+    abi: StakingContract_ABI,
+    functionName: 'pendingRewards',
+    args: address ? [address] : undefined,
+    query: { enabled: !!address, refetchInterval: 5000 }
+  });
+}
+
+export function useTotalStaked() {
+  return useReadContract({
+    address: SEPOLIA_CONTRACTS.StakingContract,
+    abi: StakingContract_ABI,
+    functionName: 'totalStaked'
+  });
+}
+
+export function useStakingConstants() {
+  const rewardRate = useReadContract({
+    address: SEPOLIA_CONTRACTS.StakingContract,
+    abi: StakingContract_ABI,
+    functionName: 'REWARD_RATE'
+  });
+
+  const minimumStake = useReadContract({
+    address: SEPOLIA_CONTRACTS.StakingContract,
+    abi: StakingContract_ABI,
+    functionName: 'MINIMUM_STAKE'
+  });
+
+  const unstakeDelay = useReadContract({
+    address: SEPOLIA_CONTRACTS.StakingContract,
+    abi: StakingContract_ABI,
+    functionName: 'UNSTAKE_DELAY'
+  });
+
+  return { rewardRate, minimumStake, unstakeDelay };
+}
+
+export function useStakeSadness() {
+  return useWriteContract();
+}
+
+export function useRequestUnstake() {
+  return useWriteContract();
+}
+
+export function useUnstakeSadness() {
+  return useWriteContract();
+}
+
+export function useHarvestFeelings() {
+  return useWriteContract();
+}
+
+// NFTClaim contract hooks
+export function useNFTBalance(address?: `0x${string}`) {
+  return useReadContract({
+    address: SEPOLIA_CONTRACTS.NFTClaim,
+    abi: NFTClaim_ABI,
+    functionName: 'balanceOf',
+    args: address ? [address] : undefined,
+    query: { enabled: !!address }
+  });
+}
+
+export function useUserTotalSadness(address?: `0x${string}`) {
+  return useReadContract({
+    address: SEPOLIA_CONTRACTS.NFTClaim,
+    abi: NFTClaim_ABI,
+    functionName: 'getUserTotalSadness',
+    args: address ? [address] : undefined,
+    query: { enabled: !!address }
+  });
+}
+
+export function useHasAchievement(address?: `0x${string}`, achievement?: number) {
+  return useReadContract({
+    address: SEPOLIA_CONTRACTS.NFTClaim,
+    abi: NFTClaim_ABI,
+    functionName: 'hasAchievement',
+    args: address && achievement !== undefined ? [address, achievement] : undefined,
+    query: { enabled: !!address && achievement !== undefined }
+  });
+}
+
+export function useAchievementInfo(achievement?: number) {
+  return useReadContract({
+    address: SEPOLIA_CONTRACTS.NFTClaim,
+    abi: NFTClaim_ABI,
+    functionName: 'getAchievementInfo',
+    args: achievement !== undefined ? [achievement] : undefined,
+    query: { enabled: achievement !== undefined }
+  });
+}
+
+export function useNFTSupplyInfo() {
+  const nextTokenId = useReadContract({
+    address: SEPOLIA_CONTRACTS.NFTClaim,
+    abi: NFTClaim_ABI,
+    functionName: 'nextTokenId'
+  });
+
+  const maxSupply = useReadContract({
+    address: SEPOLIA_CONTRACTS.NFTClaim,
+    abi: NFTClaim_ABI,
+    functionName: 'MAX_SUPPLY'
+  });
+
+  return { nextTokenId, maxSupply };
+}
+
+export function useRequestNFTClaim() {
+  return useWriteContract();
+}
+
+// Event watching for new contracts
+export function useWatchGameRewards(address?: `0x${string}`, onGameComplete?: () => void) {
+  useWatchContractEvent({
+    address: SEPOLIA_CONTRACTS.GameRewards,
+    abi: GameRewards_ABI,
+    eventName: 'SadRewardCalculated',
+    args: { player: address },
+    onLogs: () => {
+      if (onGameComplete) onGameComplete();
+    },
+    enabled: !!address
+  });
+}
+
+export function useWatchStakingRewards(address?: `0x${string}`, onHarvest?: () => void) {
+  useWatchContractEvent({
+    address: SEPOLIA_CONTRACTS.StakingContract,
+    abi: StakingContract_ABI,
+    eventName: 'FeelingsHarvested',
+    args: { staker: address },
+    onLogs: () => {
+      if (onHarvest) onHarvest();
+    },
+    enabled: !!address
+  });
+}
+
+export function useWatchNFTClaims(address?: `0x${string}`, onClaim?: () => void) {
+  useWatchContractEvent({
+    address: SEPOLIA_CONTRACTS.NFTClaim,
+    abi: NFTClaim_ABI,
+    eventName: 'NFTClaimed',
+    args: { claimer: address },
+    onLogs: () => {
+      if (onClaim) onClaim();
+    },
+    enabled: !!address
+  });
+}
+
+// Achievement enum for frontend use
+export enum SadAchievement {
+  FIRST_EMAIL = 0,
+  PROCRASTINATION_MASTER = 1,
+  EMOTIONAL_DAMAGE = 2,
+  CORPORATE_DRONE = 3,
+  WEEKEND_WARRIOR = 4,
+  MIDNIGHT_OIL = 5,
+  REPLY_ALL_DISASTER = 6,
+  AUTOCORRECT_VICTIM = 7,
+  MEETING_SCHEDULER = 8,
+  OUT_OF_OFFICE_MASTER = 9
+}
+
+export const ACHIEVEMENT_NAMES = {
+  [SadAchievement.FIRST_EMAIL]: "First Email Sent",
+  [SadAchievement.PROCRASTINATION_MASTER]: "Procrastination Master",
+  [SadAchievement.EMOTIONAL_DAMAGE]: "Emotional Damage Taken",
+  [SadAchievement.CORPORATE_DRONE]: "Corporate Drone",
+  [SadAchievement.WEEKEND_WARRIOR]: "Weekend Warrior",
+  [SadAchievement.MIDNIGHT_OIL]: "Midnight Oil Burner",
+  [SadAchievement.REPLY_ALL_DISASTER]: "Reply All Disaster",
+  [SadAchievement.AUTOCORRECT_VICTIM]: "Autocorrect Victim",
+  [SadAchievement.MEETING_SCHEDULER]: "Meeting Scheduler",
+  [SadAchievement.OUT_OF_OFFICE_MASTER]: "Out of Office Master"
+} as const;
