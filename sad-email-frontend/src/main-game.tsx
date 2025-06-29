@@ -36,7 +36,8 @@ import {
   WritingScreen,
   SentScreen,
   AgentResponsesScreen,
-  EmailViewScreen
+  EmailViewScreen,
+  WaterCoolerScreen
 } from "./components/screens"
 
 export default function Component() {
@@ -252,6 +253,14 @@ export default function Component() {
     }
   }
 
+  const handleWaterCooler = () => {
+    setGameState("water-cooler")
+  }
+
+  const handleBackFromWaterCooler = () => {
+    setGameState("email-input")
+  }
+
   const handleEmailSelect = (email: EmailContent, sender: string) => {
     setSelectedEmailContent(email)
     setSelectedEmailSender(sender)
@@ -448,7 +457,14 @@ export default function Component() {
         <LoadingContainer gameState={gameState} />
         
         {gameState === "email-input" && (
-          <EmailInputContainer onSubmit={handleEmailSubmit} />
+          <EmailInputContainer 
+            onSubmit={handleEmailSubmit} 
+            onWaterCooler={handleWaterCooler}
+          />
+        )}
+        
+        {gameState === "water-cooler" && (
+          <WaterCoolerScreen onBack={handleBackFromWaterCooler} />
         )}
       </div>
 

@@ -14,6 +14,7 @@ export type GameState =
   | "about"
   | "agent-responses"
   | "email-view"
+  | "water-cooler"
 
 export type Character = "officer" | "agent" | "monkey" | "intern"
 
