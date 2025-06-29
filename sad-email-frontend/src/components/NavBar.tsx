@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react"
 import { useAccount, useConnect, useDisconnect, useSwitchChain } from "wagmi"
-import { metaMask, walletConnect } from "wagmi/connectors"
+import { metaMask } from "wagmi/connectors"
 import { sepolia } from "wagmi/chains"
 import { useAppKit } from "@reown/appkit/react"
 import { DebugModal } from "./DebugModal"
@@ -23,9 +23,12 @@ interface NavBarProps {
     feelsLoading?: boolean
     isConnected?: boolean
   }
+  sadBalance?: string
+  feelsBalance?: string
+  onAboutClick?: () => void
 }
 
-export default function NavBar({ gameState, debugInfo }: NavBarProps) {
+export default function NavBar({ gameState, debugInfo, sadBalance = "0", feelsBalance = "0", onAboutClick }: NavBarProps) {
   const { address, isConnected, chain } = useAccount()
   const { connect, status, variables } = useConnect()
   const { disconnect } = useDisconnect()
@@ -62,213 +65,193 @@ export default function NavBar({ gameState, debugInfo }: NavBarProps) {
   return (
     <nav
       style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
         width: "100%",
         background: "#111",
         color: "#39ff14",
         fontFamily: "monospace",
-        padding: "0.75rem 2rem",
+        display: "flex",
+        flexDirection: "column",
+        borderBottom: "2px solid #39ff14",
+        boxShadow: "0 2px 8px #000a",
+        zIndex: 1000,
+        height: "70px"
+      }}
+    >
+      {/* Top line - Logo and Wallet */}
+      <div style={{
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        borderBottom: "2px solid #39ff14",
-        boxShadow: "0 2px 8px #000a",
-        zIndex: 10,
-        gap: "2rem"
-      }}
-    >
-      <div style={{ display: "flex", alignItems: "center", gap: "2rem", flex: 1 }}>
-        <div style={{ fontWeight: "bold", fontSize: "1.2rem", letterSpacing: "2px", flexShrink: 0 }}>
-          SADCOIN TERMINAL
+        padding: "0.25rem 1rem",
+        height: "35px",
+        borderBottom: "1px solid #39ff1444"
+      }}>
+        <div style={{ fontWeight: "bold", fontSize: "0.9rem", letterSpacing: "1px" }}>
+          <span style={{ color: "#39ff14" }}>SADCOIN</span>
+          <span style={{ color: "#39ff14", marginLeft: "0.5rem" }}>Let's Write an E-Mail</span>
         </div>
         
-        {/* Debug Information */}
-        {debugInfo && (
-          <div className="fixed top-28 right-4 bg-black/80 border border-green-400 p-3 rounded text-xs text-green-400 font-mono z-50 max-w-xs">
-            <div className="font-bold mb-2 text-green-300 border-b border-green-400 pb-1">DEBUG INFO</div>
-            
-            {/* Game State */}
-            {gameState && (
-              <div className="mb-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-green-300">State:</span>
-                  <span className="text-green-400">{gameState}</span>
-                </div>
-              </div>
-            )}
-            
-            {/* Wallet and Chain Group */}
-            {(debugInfo.address || debugInfo.chainId) && (
-              <div className="mb-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-green-300">Wallet:</span>
-                  <span className="text-green-400">
-                    {debugInfo.address ? `${debugInfo.address.slice(0, 6)}...${debugInfo.address.slice(-4)}` : 'Not Connected'}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-green-300">Chain:</span>
-                  <span className="text-green-400">
-                    {debugInfo.chainId} {debugInfo.isOnSepolia ? '(Sepolia)' : ''}
-                  </span>
-                </div>
-              </div>
-            )}
-
-            {/* SAD and Direct Balance Group */}
-            {(debugInfo.sadBalance || debugInfo.directSadBalance) && (
-              <div className="mb-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-green-300">SAD:</span>
-                  <span className="text-green-400">
-                    {debugInfo.sadLoading ? "..." : debugInfo.sadBalance || "0.0"}
-                  </span>
-                </div>
-                {debugInfo.directSadBalance && (
-                  <div className="flex justify-between items-center">
-                    <span className="text-green-300">Direct:</span>
-                    <span className="text-green-400">
-                      {debugInfo.directSadLoading ? "..." : debugInfo.directSadBalance}
-                    </span>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* FEELS Balance */}
-            {debugInfo.feelsBalance && (
-              <div className="mb-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-green-300">FEELS:</span>
-                  <span className="text-green-400">
-                    {debugInfo.feelsLoading ? "..." : debugInfo.feelsBalance}
-                  </span>
-                </div>
-              </div>
-            )}
-
-            {/* Connection Status */}
-            <div className="flex justify-between items-center">
-              <span className="text-green-300">Status:</span>
-              <span className={`${debugInfo.isConnected ? 'text-green-400' : 'text-red-400'}`}>
-                {debugInfo.isConnected ? 'Connected' : 'Disconnected'}
-              </span>
-            </div>
-          </div>
-        )}
-      </div>
-      
-      <div style={{ position: "relative", flexShrink: 0 }}>
-        {!isClient ? (
-          <div style={{ height: "40px", width: "120px" }}></div> // Placeholder to prevent layout shift
-        ) : !isConnected ? (
-          <>
-            <button
-              onClick={() => setShowWalletOptions((v) => !v)}
-              style={{
-                background: "#111",
-                color: "#39ff14",
-                border: "2px solid #39ff14",
-                borderRadius: "6px",
-                fontFamily: "monospace",
-                fontWeight: "bold",
-                fontSize: "1rem",
-                padding: "0.5rem 1.2rem",
-                cursor: "pointer",
-                boxShadow: "0 0 8px #39ff14aa inset",
-                transition: "background 0.2s, color 0.2s",
-              }}
-            >
-              Connect Wallet
-            </button>
-            {showWalletOptions && (
-              <div
+        <div style={{ position: "relative", flexShrink: 0 }}>
+          {!isClient ? (
+            <div style={{ height: "28px", width: "120px" }}></div>
+          ) : !isConnected ? (
+            <>
+              <button
+                onClick={() => setShowWalletOptions((v) => !v)}
                 style={{
-                  position: "absolute",
-                  right: 0,
-                  top: "110%",
                   background: "#111",
-                  border: "2px solid #39ff14",
-                  borderRadius: "6px",
-                  minWidth: "180px",
-                  boxShadow: "0 2px 8px #000a",
-                  zIndex: 100,
+                  color: "#39ff14",
+                  border: "1px solid #39ff14",
+                  borderRadius: "4px",
+                  fontFamily: "monospace",
+                  fontWeight: "bold",
+                  fontSize: "0.8rem",
+                  padding: "0.25rem 0.8rem",
+                  cursor: "pointer",
+                  height: "28px"
                 }}
               >
-                <button
-                  onClick={handleConnectMetaMask}
+                Connect
+              </button>
+              {showWalletOptions && (
+                <div
                   style={{
-                    width: "100%",
-                    background: "none",
-                    color: "#39ff14",
-                    border: "none",
-                    fontFamily: "monospace",
-                    fontWeight: "bold",
-                    fontSize: "1rem",
-                    padding: "0.75rem 1.2rem",
-                    cursor: "pointer",
-                    textAlign: "left",
-                  }}
-                  disabled={status === "pending" && variables?.connector?.name === "MetaMask"}
-                >
-                  {status === "pending" && variables?.connector?.name === "MetaMask" ? "Connecting..." : "MetaMask"}
-                </button>
-                <button
-                  onClick={handleConnectWalletConnect}
-                  style={{
-                    width: "100%",
-                    background: "none",
-                    color: "#39ff14",
-                    border: "none",
-                    fontFamily: "monospace",
-                    fontWeight: "bold",
-                    fontSize: "1rem",
-                    padding: "0.75rem 1.2rem",
-                    cursor: "pointer",
-                    textAlign: "left",
+                    position: "absolute",
+                    right: 0,
+                    top: "110%",
+                    background: "#111",
+                    border: "2px solid #39ff14",
+                    borderRadius: "6px",
+                    minWidth: "180px",
+                    boxShadow: "0 2px 8px #000a",
+                    zIndex: 100,
                   }}
                 >
-                  WalletConnect
-                </button>
-              </div>
-            )}
-          </>
-        ) : (
-          <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-            <span
-              style={{
-                background: "#222",
-                color: "#39ff14",
-                border: "1px solid #39ff14",
-                borderRadius: "4px",
-                padding: "0.3rem 0.8rem",
-                fontFamily: "monospace",
-                fontSize: "0.95rem",
-                letterSpacing: "1px",
-              }}
-            >
-              {address?.slice(0, 6)}...{address?.slice(-4)}
-            </span>
-            <DebugModal />
-            <button
-              onClick={() => disconnect()}
-              style={{
-                background: "#111",
-                color: "#39ff14",
-                border: "2px solid #39ff14",
-                borderRadius: "6px",
-                fontFamily: "monospace",
-                fontWeight: "bold",
-                fontSize: "1rem",
-                padding: "0.3rem 1rem",
-                cursor: "pointer",
-                boxShadow: "0 0 8px #39ff14aa inset",
-                transition: "background 0.2s, color 0.2s",
-              }}
-            >
-              Disconnect
-            </button>
-          </div>
-        )}
+                  <button
+                    onClick={handleConnectMetaMask}
+                    style={{
+                      width: "100%",
+                      background: "none",
+                      color: "#39ff14",
+                      border: "none",
+                      fontFamily: "monospace",
+                      fontWeight: "bold",
+                      fontSize: "1rem",
+                      padding: "0.75rem 1.2rem",
+                      cursor: "pointer",
+                      textAlign: "left",
+                    }}
+                    disabled={status === "pending" && variables?.connector?.name === "MetaMask"}
+                  >
+                    {status === "pending" && variables?.connector?.name === "MetaMask" ? "Connecting..." : "MetaMask"}
+                  </button>
+                  <button
+                    onClick={handleConnectWalletConnect}
+                    style={{
+                      width: "100%",
+                      background: "none",
+                      color: "#39ff14",
+                      border: "none",
+                      fontFamily: "monospace",
+                      fontWeight: "bold",
+                      fontSize: "1rem",
+                      padding: "0.75rem 1.2rem",
+                      cursor: "pointer",
+                      textAlign: "left",
+                    }}
+                  >
+                    WalletConnect
+                  </button>
+                </div>
+              )}
+            </>
+          ) : (
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              <span
+                style={{
+                  background: "#222",
+                  color: "#39ff14",
+                  border: "1px solid #39ff14",
+                  borderRadius: "4px",
+                  padding: "0.2rem 0.6rem",
+                  fontFamily: "monospace",
+                  fontSize: "0.8rem",
+                }}
+              >
+                {address?.slice(0, 6)}...{address?.slice(-4)}
+              </span>
+              <DebugModal debugInfo={debugInfo} gameState={gameState} />
+              <button
+                onClick={() => disconnect()}
+                style={{
+                  background: "#111",
+                  color: "#39ff14",
+                  border: "1px solid #39ff14",
+                  borderRadius: "4px",
+                  fontFamily: "monospace",
+                  fontWeight: "bold",
+                  fontSize: "0.8rem",
+                  padding: "0.2rem 0.6rem",
+                  cursor: "pointer",
+                  height: "28px"
+                }}
+              >
+                Disconnect
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Bottom line - Token balances and About */}
+      <div style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: "0.25rem 1rem",
+        height: "35px"
+      }}>
+        <button
+          onClick={onAboutClick}
+          style={{
+            background: "#111",
+            color: "#06b6d4",
+            border: "1px solid #06b6d4",
+            borderRadius: "4px",
+            fontFamily: "monospace",
+            fontWeight: "bold",
+            fontSize: "0.8rem",
+            padding: "0.2rem 0.8rem",
+            cursor: "pointer",
+            height: "28px"
+          }}
+        >
+          ABOUT
+        </button>
+        
+        <div style={{ display: "flex", gap: "1rem", fontSize: "0.8rem" }}>
+          <span style={{
+            border: "1px solid #fbbf24",
+            color: "#fbbf24",
+            background: "#111",
+            padding: "0.2rem 0.6rem",
+            borderRadius: "4px"
+          }}>
+            SAD: {sadBalance}
+          </span>
+          <span style={{
+            border: "1px solid #ec4899",
+            color: "#ec4899",
+            background: "#111",
+            padding: "0.2rem 0.6rem",
+            borderRadius: "4px"
+          }}>
+            FEELS: {feelsBalance}
+          </span>
+        </div>
       </div>
     </nav>
   )

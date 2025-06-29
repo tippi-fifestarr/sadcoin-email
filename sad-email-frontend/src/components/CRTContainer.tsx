@@ -14,20 +14,22 @@ export default function CRTContainer({ children }: CRTContainerProps) {
   return (
     <div
       style={{
-        minHeight: "100vh",
         width: "100vw",
         display: "flex",
-        alignItems: "center",
+        alignItems: "flex-start",
         justifyContent: "center",
         background: "#000",
+        paddingTop: "30px",
+        boxSizing: "border-box"
       }}
     >
       <div style={{
         position: "relative",
-        width: "80vw",
-        maxWidth: "900px",
+        width: "min(75vw, 700px)",
+        maxWidth: "700px",
         aspectRatio: "1/1",
         height: "auto",
+        maxHeight: "calc(100vh - 200px)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -51,12 +53,12 @@ export default function CRTContainer({ children }: CRTContainerProps) {
             width: SCREEN_WIDTH,
             height: SCREEN_HEIGHT,
             overflow: "auto",
-            background: "rgba(0, 0, 0, 0)",
+            background: "rgba(0, 0, 0, 0.1)",
             color: "#39ff14",
             fontFamily: "monospace",
-            borderRadius: "8px",
-            boxShadow: "0 0 24px #000 inset",
-            padding: "4vw 4vw 4vw 4vw",
+            borderRadius: "6px",
+            boxShadow: "0 0 20px rgba(0, 0, 0, 0.8) inset",
+            padding: "2vw 2vw 2vw 2vw",
             display: "flex",
             flexDirection: "column",
             justifyContent: "flex-start",

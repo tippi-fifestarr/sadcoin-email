@@ -2,21 +2,18 @@
 
 import { useState, useEffect } from "react"
 import { useAccount } from "wagmi"
-import { useChainId, useSwitchChain } from "wagmi"
-import { sepolia } from "wagmi/chains"
-import { Button } from "@/components/ui/button"
+import { useChainId } from "wagmi"
 import { Card } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import AboutPage from "./about-page"
+import AboutModal from "./components/AboutModal"
 import CRTContainer from "./components/CRTContainer"
 import NavBar from "./components/NavBar"
 import { GameState, Character, Email } from "@/types/game"
-import { emails, characterResponses } from "@/data/gameData"
-import { 
-  useSADCoinBalance, 
-  useFEELSBalance, 
-  formatSADBalance, 
-  formatFEELSBalance 
+import { emails } from "@/data/gameData"
+import {
+  useSADCoinBalance,
+  useFEELSBalance,
+  formatSADBalance,
+  formatFEELSBalance
 } from "@/hooks/useContracts"
 import { useReadContract } from "wagmi"
 import { SEPOLIA_CONTRACTS } from "@/lib/contracts"
@@ -45,16 +42,15 @@ import {
 export default function Component() {
   const { address, isConnected } = useAccount()
   const chainId = useChainId()
-  const { switchChain } = useSwitchChain()
   const [gameState, setGameState] = useState<GameState>("boot")
   const [selectedEmail, setSelectedEmail] = useState<Email | null>(null)
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null)
-  const [gameProgress, setGameProgress] = useState(0)
   const [generatedEmails, setGeneratedEmails] = useState<EmailGenerationResponse | null>(null)
   const [isGeneratingEmail, setIsGeneratingEmail] = useState(false)
   const [userSadInput, setUserSadInput] = useState("")
   const [selectedEmailContent, setSelectedEmailContent] = useState<EmailContent | null>(null)
   const [selectedEmailSender, setSelectedEmailSender] = useState<string>("")
+  const [isAboutModalOpen, setIsAboutModalOpen] = useState(false)
 
   // Web3 token balances
   const { data: sadBalance, error: sadError, isLoading: sadLoading } = useSADCoinBalance(address)
@@ -282,7 +278,6 @@ export default function Component() {
     setGameState("login")
     setSelectedEmail(null)
     setSelectedCharacter(null)
-    setGameProgress(0)
     setGeneratedEmails(null)
     setIsGeneratingEmail(false)
     setUserSadInput("")
@@ -374,7 +369,7 @@ export default function Component() {
           <WritingScreen
             selectedCharacter={selectedCharacter}
             generatedEmail={selectedEmailContent}
-            isGeneratingEmail={false}
+            isGeneratingEmail={isGeneratingEmail}
             onSendEmail={sendEmail}
           />
         ) : null
@@ -386,8 +381,6 @@ export default function Component() {
           />
         )
 
-      case "about":
-        return <AboutPage onBack={() => setGameState("inbox")} />
 
       case "agent-responses":
         return generatedEmails ? (
@@ -416,8 +409,8 @@ export default function Component() {
   }
 
   return (
-    <>
-      <NavBar 
+    <div className="min-h-screen bg-black">
+      <NavBar
         gameState={gameState}
         debugInfo={{
           chainId,
@@ -433,51 +426,36 @@ export default function Component() {
           feelsBalance: feelsBalance?.toString(),
           feelsLoading
         }}
+        sadBalance={sadCoins}
+        feelsBalance={feels}
+        onAboutClick={() => setIsAboutModalOpen(true)}
       />
-      <CRTContainer>
-        <Card className="border-2 border-green-400 bg-black text-green-400 w-full h-full flex flex-col">
-          {/* Header */}
-          <div className="border-b-2 border-green-400 p-4 bg-black">
-            <div className="flex justify-between items-center">
-              <h1 className="text-2xl font-bold text-center flex-1">═══ LETSWRITEAN.EMAIL ═══</h1>
-              <div className="flex gap-4 text-sm">
-                <Badge variant="outline" className="border-yellow-400 text-yellow-400">
-                  SAD: {sadCoins}
-                </Badge>
-                <Badge variant="outline" className="border-pink-400 text-pink-400">
-                  FEELS: {feels}
-                </Badge>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setGameState("about")}
-                  className="border-cyan-400 text-cyan-400 hover:bg-cyan-900/20"
-                >
-                  ABOUT
-                </Button>
-              </div>
+      <div className="bg-black" style={{ minHeight: "calc(100vh - 70px)" }}>
+        {/* Monitor Area */}
+        <CRTContainer>
+          <Card className="border-2 border-green-400 bg-black text-green-400 w-full h-full flex flex-col">
+            {/* Main Terminal - Full screen usage */}
+            <div className="flex-1 overflow-auto p-6">
+              {renderScreen()}
             </div>
-          </div>
+          </Card>
+        </CRTContainer>
+        
+        {/* 20px spacing before EmailInputContainer/LoadingContainer */}
+        <div style={{ height: "20px" }}></div>
+        
+        {/* Loading containers and email input container - now in main flow */}
+        <LoadingContainer gameState={gameState} />
+        
+        {gameState === "email-input" && (
+          <EmailInputContainer onSubmit={handleEmailSubmit} />
+        )}
+      </div>
 
-          {/* Main Terminal */}
-          <div className="flex-1 overflow-auto p-6">
-            {renderScreen()}
-          </div>
-
-          {/* Footer */}
-          <div className="text-center text-green-600 text-sm border-t-2 border-green-400 p-2">
-            <p>A productivity tool disguised as a procrastination game</p>
-            <p className="text-xs mt-1">Built for the intersection of game theory and behavioral economics</p>
-          </div>
-        </Card>
-      </CRTContainer>
-
-      {/* Loading containers and email input container */}
-      <LoadingContainer gameState={gameState} />
-      
-      {gameState === "email-input" && (
-        <EmailInputContainer onSubmit={handleEmailSubmit} />
-      )}
-    </>
+      <AboutModal
+        isOpen={isAboutModalOpen}
+        onClose={() => setIsAboutModalOpen(false)}
+      />
+    </div>
   )
 }
