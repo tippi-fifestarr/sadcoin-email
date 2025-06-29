@@ -156,8 +156,7 @@ No permission is granted to use, copy, modify, or distribute this software witho
 - [Frontend Documentation](./sad-email-frontend/README.md)
 - [Smart Contract Documentation](./contracts-immense-pool-of-sadness/README.md)
 - [Live Application](https://letswritean.email)
-- [Game Design Document](./docs/game-design.md)
-- [Chainlink Integration Guide](./docs/chainlink-integration.md)
+- [Game Design Document](https://docs.google.com/presentation/d/1MeTqPrfJGQR_Uc70N27OEhlDWeDzmbjMLyvjaQyDbAo/edit?usp=sharing)
 
 ---
 
