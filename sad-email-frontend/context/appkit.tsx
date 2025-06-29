@@ -8,7 +8,7 @@ import { http, WagmiProvider, cookieToInitialState } from 'wagmi'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import React, { type ReactNode } from 'react'
 
-export const projectId = process.env.NEXT_PUBLIC_PROJECT_ID
+export const projectId = "fe55eee8f74c6e7996b8e0f1b96d6895";
 
 if (!projectId) {
   throw new Error('Project ID is not defined')

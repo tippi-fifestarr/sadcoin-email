@@ -49,6 +49,20 @@ export function useSadnessLevel(address?: `0x${string}`) {
   });
 }
 
+export function useSADAllowance(owner?: `0x${string}`, spender?: `0x${string}`) {
+  return useReadContract({
+    address: SEPOLIA_CONTRACTS.SADCoin,
+    abi: SADCoin_ABI,
+    functionName: 'allowance',
+    args: owner && spender ? [owner, spender] : undefined,
+    query: { enabled: !!(owner && spender) }
+  });
+}
+
+export function useApproveSAD() {
+  return useWriteContract();
+}
+
 export function useSADCoinInfo() {
   const name = useReadContract({
     address: SEPOLIA_CONTRACTS.SADCoin,

@@ -38,9 +38,11 @@ import {
   ACHIEVEMENT_NAMES,
   useWatchGameRewards,
   useWatchStakingRewards,
-  useWatchNFTClaims
+  useWatchNFTClaims,
+  useSADAllowance,
+  useApproveSAD
 } from "@/hooks/useContracts"
-import { SEPOLIA_CONTRACTS, ConversionContract_ABI, StakingContract_ABI, GameRewards_ABI, NFTClaim_ABI } from "@/lib/contracts"
+import { SEPOLIA_CONTRACTS, ConversionContract_ABI, StakingContract_ABI, GameRewards_ABI, NFTClaim_ABI, SADCoin_ABI } from "@/lib/contracts"
 import { NetworkSwitcher } from "./NetworkSwitcher"
 
 export function DebugPanel() {
@@ -69,6 +71,9 @@ export function DebugPanel() {
   const { data: nftBalance } = useNFTBalance(address)
   const { data: userTotalSadness } = useUserTotalSadness(address)
   
+  // Allowance data for staking
+  const { data: stakingAllowance, refetch: refetchAllowance } = useSADAllowance(address, SEPOLIA_CONTRACTS.StakingContract)
+  
   // Purchase testing
   const [testEthAmount, setTestEthAmount] = useState("0.001")
   const isValidEthAmount = testEthAmount !== "" && !isNaN(Number(testEthAmount)) && Number(testEthAmount) > 0
@@ -95,6 +100,7 @@ export function DebugPanel() {
   const { writeContract: requestUnstake, isPending: isRequestingUnstake } = useRequestUnstake()
   const { writeContract: unstakeSadness, isPending: isUnstaking } = useUnstakeSadness()
   const { writeContract: harvestFeelings, isPending: isHarvesting } = useHarvestFeelings()
+  const { writeContract: approveSAD, isPending: isApproving } = useApproveSAD()
   
   // Game testing
   const [testGameScore, setTestGameScore] = useState("50")
@@ -210,9 +216,48 @@ export function DebugPanel() {
     }
   }
 
+  // Approval handler
+  const handleApproveSAD = async () => {
+    if (!address) return
+    
+    try {
+      setStatus("Approving SAD for staking...")
+      setLastAction("Requesting approval...")
+      
+      const hash = await approveSAD({
+        address: SEPOLIA_CONTRACTS.SADCoin,
+        abi: SADCoin_ABI,
+        functionName: 'approve',
+        args: [SEPOLIA_CONTRACTS.StakingContract, parseEther("1000000")] // Approve large amount
+      })
+      
+      setStatus("Approval transaction sent!")
+      setLastAction("Approval submitted to mempool")
+      refetchAllowance() // Refresh allowance after approval
+      
+    } catch (error: unknown) {
+      const errorMsg = (error as Error).message?.includes('user rejected') 
+        ? "Transaction cancelled by user"
+        : `Error: ${(error as Error).message}`
+      
+      setStatus(`❌ ${errorMsg}`)
+      setLastAction(`Approval failed: ${errorMsg}`)
+    }
+  }
+
   // Staking handlers
   const handleStakeTest = async () => {
     if (!address || !sadBalance || parseEther(testStakeAmount) > (sadBalance as bigint)) return
+    
+    // Check if approval is needed
+    const stakeAmount = parseEther(testStakeAmount)
+    const currentAllowance = (stakingAllowance as bigint) || BigInt(0)
+    
+    if (currentAllowance < stakeAmount) {
+      setStatus("❌ Need approval first - click APPROVE button")
+      setLastAction("Insufficient allowance for staking contract")
+      return
+    }
     
     try {
       setStatus("Staking SAD tokens...")
@@ -222,7 +267,7 @@ export function DebugPanel() {
         address: SEPOLIA_CONTRACTS.StakingContract,
         abi: StakingContract_ABI,
         functionName: 'stakeSadness',
-        args: [parseEther(testStakeAmount)]
+        args: [stakeAmount]
       })
       
       setStatus("Stake transaction sent!")
@@ -429,6 +474,7 @@ export function DebugPanel() {
         <div>Total Staked: {formatSADBalance(typeof totalStaked === 'bigint' ? totalStaked : BigInt(0))} SAD</div>
         <div>Reward Rate: {typeof rewardRate.data === 'bigint' ? rewardRate.data.toString() : "42"} FEELS/hour</div>
         <div>Min Stake: {formatSADBalance(typeof minimumStake.data === 'bigint' ? minimumStake.data : BigInt(69 * 10**18))} SAD</div>
+        <div>Allowance: {formatSADBalance(typeof stakingAllowance === 'bigint' ? stakingAllowance : BigInt(0))} SAD</div>
         <div>Unstake Requested: {stakeInfo && Array.isArray(stakeInfo) ? (stakeInfo[4] ? "Yes" : "No") : "No"}</div>
       </div>
 
@@ -508,7 +554,17 @@ export function DebugPanel() {
           />
           <span>SAD to stake</span>
         </div>
+        <div className="text-xs text-green-300 mt-1">
+          Allowance: {formatSADBalance(typeof stakingAllowance === 'bigint' ? stakingAllowance : BigInt(0))} SAD
+        </div>
         <div className="flex gap-2 mt-2">
+          <Button
+            onClick={handleApproveSAD}
+            disabled={isApproving || isWrongNetwork}
+            className="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1 h-auto"
+          >
+            {isApproving ? "Approving..." : "✅ APPROVE"}
+          </Button>
           <Button
             onClick={handleStakeTest}
             disabled={isStaking || isWrongNetwork || !sadBalance || parseEther(testStakeAmount || "0") > (sadBalance as bigint)}
