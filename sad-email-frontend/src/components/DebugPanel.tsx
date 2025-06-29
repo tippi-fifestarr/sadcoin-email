@@ -73,7 +73,7 @@ export function DebugPanel() {
   const [testEthAmount, setTestEthAmount] = useState("0.001")
   const isValidEthAmount = testEthAmount !== "" && !isNaN(Number(testEthAmount)) && Number(testEthAmount) > 0
   const { data: purchasePreview } = usePurchaseCalculation(isValidEthAmount ? testEthAmount : "0")
-  const { write, isPending: isPurchasing } = usePurchaseSadness(isValidEthAmount ? testEthAmount : undefined)
+  const { writeContract: purchaseSadness, isPending: isPurchasing } = usePurchaseSadness()
   let sadAmountStr = "0";
   if (
     purchasePreview &&
@@ -145,8 +145,8 @@ export function DebugPanel() {
   })
 
   const handlePurchaseTest = async (): Promise<void> => {
-    if (!address || !canPurchase) {
-      setStatus("❌ Cannot purchase: " + (!address ? "No wallet connected" : "In cooldown period"))
+    if (!address || !canPurchase || !isValidEthAmount) {
+      setStatus("❌ Cannot purchase: " + (!address ? "No wallet connected" : !canPurchase ? "In cooldown period" : "Invalid ETH amount"))
       return;
     }
     try {
@@ -157,8 +157,15 @@ export function DebugPanel() {
         amount: testEthAmount,
         value: parseEther(testEthAmount).toString()
       })
-      await write?.()
-      console.log("Transaction sent!")
+      
+      const hash = await purchaseSadness({
+        address: SEPOLIA_CONTRACTS.ConversionContract,
+        abi: ConversionContract_ABI,
+        functionName: 'purchaseSadness',
+        value: parseEther(testEthAmount)
+      })
+      
+      console.log("Transaction sent! Hash:", hash)
       setStatus("Transaction sent! Waiting for confirmation...")
       setLastAction("Transaction submitted to mempool")
     } catch (error: unknown) {
@@ -211,7 +218,7 @@ export function DebugPanel() {
       setStatus("Staking SAD tokens...")
       setLastAction("Initiating stake...")
       
-      await stakeSadness({
+      const hash = await stakeSadness({
         address: SEPOLIA_CONTRACTS.StakingContract,
         abi: StakingContract_ABI,
         functionName: 'stakeSadness',
@@ -238,11 +245,10 @@ export function DebugPanel() {
       setStatus("Requesting unstake...")
       setLastAction("Initiating unstake request...")
       
-      await requestUnstake({
+      const hash = await requestUnstake({
         address: SEPOLIA_CONTRACTS.StakingContract,
         abi: StakingContract_ABI,
-        functionName: 'requestUnstake',
-        args: []
+        functionName: 'requestUnstake'
       })
       
       setStatus("Unstake request sent!")
@@ -265,11 +271,10 @@ export function DebugPanel() {
       setStatus("Harvesting rewards...")
       setLastAction("Initiating harvest...")
       
-      await harvestFeelings({
+      const hash = await harvestFeelings({
         address: SEPOLIA_CONTRACTS.StakingContract,
         abi: StakingContract_ABI,
-        functionName: 'harvestFeelings',
-        args: []
+        functionName: 'harvestFeelings'
       })
       
       setStatus("Harvest transaction sent!")
@@ -293,11 +298,10 @@ export function DebugPanel() {
       setStatus("Starting game session...")
       setLastAction("Creating new game session...")
       
-      const result = await startGameSession({
+      const hash = await startGameSession({
         address: SEPOLIA_CONTRACTS.GameRewards,
         abi: GameRewards_ABI,
-        functionName: 'startGameSession',
-        args: []
+        functionName: 'startGameSession'
       })
       
       setStatus("Game session started!")
@@ -320,7 +324,7 @@ export function DebugPanel() {
       setStatus("Completing game...")
       setLastAction("Submitting game score...")
       
-      await completeGame({
+      const hash = await completeGame({
         address: SEPOLIA_CONTRACTS.GameRewards,
         abi: GameRewards_ABI,
         functionName: 'completeGame',
@@ -352,7 +356,7 @@ export function DebugPanel() {
       const emailHash = `test_email_${Date.now()}_${selectedAchievement}`
       const verificationData = `demo_verification_${selectedAchievement}`
       
-      await requestNFTClaim({
+      const hash = await requestNFTClaim({
         address: SEPOLIA_CONTRACTS.NFTClaim,
         abi: NFTClaim_ABI,
         functionName: 'requestClaim',

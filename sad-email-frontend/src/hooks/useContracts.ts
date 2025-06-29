@@ -181,39 +181,8 @@ export function useDailyConversionStatus(address?: `0x${string}`) {
 }
 
 // Write contract hooks
-/**
- * usePurchaseSadness - Wagmi v2+ hook for payable purchaseSadness function.
- * @param ethAmount - ETH amount to send (string or bigint, in ETH units)
- * @param args - Arguments for purchaseSadness (if any)
- * @returns Wagmi writeContract function, simulation status, and error
- *
- * Usage:
- *   const { write, isSimulating, isSimulated, error } = usePurchaseSadness(testEthAmount, [arg1, arg2])
- *   write?.()
- */
-export function usePurchaseSadness(ethAmount?: string | bigint, args: any[] = []) {
-  const value = ethAmount ? parseEther(ethAmount.toString()) : undefined;
-  const simulate = useSimulateContract({
-    address: SEPOLIA_CONTRACTS.ConversionContract,
-    abi: ConversionContract_ABI,
-    functionName: 'purchaseSadness',
-    args,
-    value,
-    query: { enabled: value !== undefined && (typeof value === 'bigint' ? value > BigInt(0) : Number(value) > 0) },
-  });
-  const { writeContract, isPending, data, error: writeError } = useWriteContract();
-  const write = simulate.data?.request
-    ? () => writeContract(simulate.data.request)
-    : undefined;
-  return {
-    write,
-    isSimulating: simulate.isPending,
-    isSimulated: simulate.isSuccess,
-    simulationError: simulate.error,
-    isPending,
-    data,
-    writeError,
-  };
+export function usePurchaseSadness() {
+  return useWriteContract();
 }
 
 export function useConvertFeelsToSad() {
