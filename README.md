@@ -11,7 +11,7 @@
 **Let's Write An Email** is a Web3-enabled productivity game that tricks you into writing emails while you think you're procrastinating. Navigate through four corporate archetypes (Officer, Agent, Monkey, Intern), play intentionally frustrating mini-games, and watch as AI transforms your gameplay into actual emails.
 
 ### 🔗 Live Demo
-[letswritean.email](https://letswritean.email) - Coming Soon
+[letswritean.email](https://www.letswritean.email) - Coming Soon
 
 ### 📹 Demo Video
 [Hackathon Submission Video] - Coming Soon
