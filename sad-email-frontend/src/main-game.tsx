@@ -337,6 +337,7 @@ export default function Component() {
         return (
           <EmailInputScreen
             onSubmit={handleEmailSubmit}
+            onWaterCooler={handleWaterCooler}
           />
         )
 
@@ -412,6 +413,11 @@ export default function Component() {
           />
         ) : null
 
+      case "water-cooler":
+        return (
+          <WaterCoolerScreen onBack={handleBackFromWaterCooler} />
+        )
+
       default:
         return null
     }
@@ -463,9 +469,6 @@ export default function Component() {
           />
         )}
         
-        {gameState === "water-cooler" && (
-          <WaterCoolerScreen onBack={handleBackFromWaterCooler} />
-        )}
       </div>
 
       <AboutModal

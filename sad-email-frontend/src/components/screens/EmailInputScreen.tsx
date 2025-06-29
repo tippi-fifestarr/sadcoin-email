@@ -67,26 +67,25 @@ export function EmailInputContainer({ onSubmit, onWaterCooler }: EmailInputScree
           </div>
         </div>
         
-        {/* Submit button */}
-        <div className="w-24 h-8 border-2 border-green-400 bg-black rounded-lg flex items-center justify-center">
-          <Button 
-            onClick={handleSubmit}
-            className="bg-green-600 hover:bg-green-700 text-black text-xs px-2 py-1"
-          >
-            WRITE THE E-MAIL
-          </Button>
-        </div>
-      </div>
-      
-      {/* Water Cooler button */}
-      <div className="flex justify-center mt-4">
-        <div className="w-32 h-8 border-2 border-blue-400 bg-black rounded-lg flex items-center justify-center">
-          <Button 
-            onClick={onWaterCooler}
-            className="bg-blue-600 hover:bg-blue-700 text-white text-xs px-2 py-1"
-          >
-            💧 WATER COOLER
-          </Button>
+        {/* Submit and Water Cooler buttons */}
+        <div className="flex flex-col gap-3">
+          <div className="w-24 h-8 border-2 border-green-400 bg-black rounded-lg flex items-center justify-center">
+            <Button 
+              onClick={handleSubmit}
+              className="bg-green-600 hover:bg-green-700 text-black text-xs px-2 py-1"
+            >
+              WRITE THE E-MAIL
+            </Button>
+          </div>
+          
+          <div className="w-32 h-8 border-2 border-blue-400 bg-black rounded-lg flex items-center justify-center">
+            <Button 
+              onClick={onWaterCooler}
+              className="bg-blue-600 hover:bg-blue-700 text-white text-xs px-2 py-1"
+            >
+              💧 WATER COOLER
+            </Button>
+          </div>
         </div>
       </div>
     </div>
