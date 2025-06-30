@@ -99,6 +99,11 @@ export default function Component() {
   const [feels, setFeels] = useState(0)
   const [booted, setBooted] = useState(false)
   
+  // Email composition state
+  const [recipientEmail, setRecipientEmail] = useState("")
+  const [emailSubject, setEmailSubject] = useState("")
+  const [emailBody, setEmailBody] = useState("")
+  
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [gameProgress, setGameProgress] = useState(0)
 
@@ -152,9 +157,29 @@ export default function Component() {
     }, 3000)
   }
 
-  const sendEmail = () => {
-    setGameState("sent")
-    setFeels((prev) => prev + 20)
+  const sendEmail = async () => {
+    // Send email content to backend for Resend integration
+    try {
+      const res = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          to: recipientEmail,
+          subject: emailSubject,
+          body: emailBody,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        alert('Failed to send email: ' + (data.error || 'Unknown error'));
+      } else {
+        alert('Email sent successfully!');
+        setGameState('sent');
+        setFeels((prev) => prev + 20);
+      }
+    } catch (err) {
+      alert('Failed to send email: ' + (err instanceof Error ? err.message : 'Unknown error'));
+    }
   }
 
   const resetGame = () => {
@@ -304,15 +329,41 @@ export default function Component() {
                   <div className="text-sm text-green-500 mb-2">
                     AI Assistant ({selectedCharacter?.toUpperCase()}) is helping you write...
                   </div>
-                  <div className="bg-green-900/20 p-4 rounded">
-                    <p className="text-green-300">
-                      Your email has been intelligently crafted based on your interactions! The {selectedCharacter}{" "}
-                      personality has been applied, and your mini-game performance has influenced the tone and content.
-                    </p>
-                    <div className="mt-4 text-sm text-green-500">
-                      • Professional formatting: ✓<br />• Personality quirks added: ✓<br />• Appropriate level of chaos:
-                      ✓<br />• Ready to send to your REAL inbox: ✓
-                    </div>
+                  
+                  {/* Recipient Email Input */}
+                  <div className="mb-4">
+                    <label className="block text-sm text-green-400 mb-2">To: (recipientEmail)</label>
+                    <input
+                      type="email"
+                      value={recipientEmail}
+                      onChange={(e) => setRecipientEmail(e.target.value)}
+                      className="w-full bg-black border border-green-400 text-green-300 p-2 focus:outline-none focus:border-green-300"
+                      placeholder="Enter recipient email address..."
+                    />
+                  </div>
+
+                  {/* Editable Subject */}
+                  <div className="mb-4">
+                    <label className="block text-sm text-green-400 mb-2">Subject:</label>
+                    <input
+                      type="text"
+                      value={emailSubject}
+                      onChange={(e) => setEmailSubject(e.target.value)}
+                      className="w-full bg-black border border-green-400 text-green-300 p-2 focus:outline-none focus:border-green-300"
+                      placeholder="Enter email subject..."
+                    />
+                  </div>
+
+                  {/* Editable Body */}
+                  <div className="mb-4">
+                    <label className="block text-sm text-green-400 mb-2">Body:</label>
+                    <textarea
+                      value={emailBody}
+                      onChange={(e) => setEmailBody(e.target.value)}
+                      rows={8}
+                      className="w-full bg-black border border-green-400 text-green-300 p-2 focus:outline-none focus:border-green-300 resize-none"
+                      placeholder="Enter email body..."
+                    />
                   </div>
                 </div>
                 <div className="text-center">

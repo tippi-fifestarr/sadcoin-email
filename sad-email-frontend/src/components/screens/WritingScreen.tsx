@@ -1,12 +1,13 @@
 import { Button } from '@/components/ui/button'
 import { Character } from '@/types/game'
 import { EmailContent } from '@/lib/gemini'
+import { useState, useEffect } from 'react'
 
 interface WritingScreenProps {
   selectedCharacter: Character | null
   generatedEmail: EmailContent | null
   isGeneratingEmail: boolean
-  onSendEmail: () => void
+  onSendEmail: (email: EmailContent, recipientEmail: string) => void
 }
 
 export function WritingScreen({ 
@@ -15,6 +16,41 @@ export function WritingScreen({
   isGeneratingEmail, 
   onSendEmail 
 }: WritingScreenProps) {
+  const [editableEmail, setEditableEmail] = useState<EmailContent>({ subject: '', body: '' })
+  const [recipientEmail, setRecipientEmail] = useState('')
+
+  // Update editable email when generated email changes
+  useEffect(() => {
+    if (generatedEmail) {
+      setEditableEmail({
+        subject: generatedEmail.subject,
+        body: generatedEmail.body
+      })
+    }
+  }, [generatedEmail])
+
+  const handleSubjectChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEditableEmail(prev => ({
+      ...prev,
+      subject: e.target.value
+    }))
+  }
+
+  const handleBodyChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setEditableEmail(prev => ({
+      ...prev,
+      body: e.target.value
+    }))
+  }
+
+  const handleRecipientEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setRecipientEmail(e.target.value)
+  }
+
+  const handleSendEmail = () => {
+    onSendEmail(editableEmail, recipientEmail)
+  }
+
   return (
     <div>
       <h2 className="text-xl mb-4">✍️ Email Composition</h2>
@@ -30,10 +66,45 @@ export function WritingScreen({
 
       {generatedEmail && (
         <div className="border border-green-400 p-4 mb-4">
-          <div className="text-sm text-green-500 mb-2">Generated Email:</div>
-          <div className="text-lg mb-2 font-bold">{generatedEmail.subject}</div>
-          <div className="text-green-300 leading-relaxed whitespace-pre-wrap mb-4">{generatedEmail.body}</div>
-          <Button onClick={onSendEmail} className="bg-green-600 hover:bg-green-700 text-black">
+          <div className="text-sm text-green-500 mb-2">Edit Your Email:</div>
+          
+          {/* Recipient Email Input */}
+          <div className="mb-4">
+            <label className="block text-sm text-green-400 mb-2">To: (recipientEmail)</label>
+            <input
+              type="email"
+              value={recipientEmail}
+              onChange={handleRecipientEmailChange}
+              className="w-full bg-black border border-green-400 text-green-300 p-2 focus:outline-none focus:border-green-300"
+              placeholder="Enter recipient email address..."
+            />
+          </div>
+
+          {/* Editable Subject */}
+          <div className="mb-4">
+            <label className="block text-sm text-green-400 mb-2">Subject:</label>
+            <input
+              type="text"
+              value={editableEmail.subject}
+              onChange={handleSubjectChange}
+              className="w-full bg-black border border-green-400 text-green-300 p-2 focus:outline-none focus:border-green-300"
+              placeholder="Enter email subject..."
+            />
+          </div>
+
+          {/* Editable Body */}
+          <div className="mb-4">
+            <label className="block text-sm text-green-400 mb-2">Body:</label>
+            <textarea
+              value={editableEmail.body}
+              onChange={handleBodyChange}
+              rows={8}
+              className="w-full bg-black border border-green-400 text-green-300 p-2 focus:outline-none focus:border-green-300 resize-none"
+              placeholder="Enter email body..."
+            />
+          </div>
+
+          <Button onClick={handleSendEmail} className="bg-green-600 hover:bg-green-700 text-black">
             Send Email →
           </Button>
         </div>

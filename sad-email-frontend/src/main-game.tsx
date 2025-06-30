@@ -271,16 +271,62 @@ export default function Component() {
     setGameState("agent-responses")
   }
 
-  const handleEmailViewContinue = () => {
-    setGameState("writing")
+  const handleEmailViewContinue = async (emailContent: EmailContent, recipientEmail: string) => {
+    if (!emailContent || !recipientEmail) return;
+    setIsGeneratingEmail(true);
+    try {
+      const res = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          to: recipientEmail,
+          subject: emailContent.subject,
+          body: emailContent.body,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        alert('Failed to send email: ' + (data.error || 'Unknown error'));
+      } else {
+        alert('Email sent successfully!');
+        setGameState('sent');
+      }
+    } catch (err) {
+      alert('Failed to send email: ' + (err instanceof Error ? err.message : 'Unknown error'));
+    } finally {
+      setIsGeneratingEmail(false);
+    }
   }
 
   const playMiniGame = () => {
     setGameState("mini-game")
   }
 
-  const sendEmail = () => {
-    setGameState("sent")
+  const sendEmail = async (emailContent?: EmailContent, recipientEmail?: string) => {
+    if (!emailContent || !recipientEmail) return;
+    setIsGeneratingEmail(true);
+    try {
+      const res = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          to: recipientEmail,
+          subject: emailContent.subject,
+          body: emailContent.body,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        alert('Failed to send email: ' + (data.error || 'Unknown error'));
+      } else {
+        alert('Email sent successfully!');
+        setGameState('sent');
+      }
+    } catch (err) {
+      alert('Failed to send email: ' + (err instanceof Error ? err.message : 'Unknown error'));
+    } finally {
+      setIsGeneratingEmail(false);
+    }
   }
 
   const resetGame = () => {
@@ -380,7 +426,7 @@ export default function Component() {
             selectedCharacter={selectedCharacter}
             generatedEmail={selectedEmailContent}
             isGeneratingEmail={isGeneratingEmail}
-            onSendEmail={sendEmail}
+            onSendEmail={(emailContent, recipientEmail) => sendEmail(emailContent, recipientEmail)}
           />
         ) : null
 
