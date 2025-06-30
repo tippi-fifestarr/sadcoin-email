@@ -22,6 +22,8 @@ interface NavBarProps {
     feelsBalance?: string
     feelsLoading?: boolean
     isConnected?: boolean
+    useAWS?: boolean
+    setUseAWS?: (value: boolean) => void
   }
   sadBalance?: string
   feelsBalance?: string

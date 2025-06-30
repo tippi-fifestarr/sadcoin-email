@@ -45,7 +45,12 @@ import {
 import { SEPOLIA_CONTRACTS, ConversionContract_ABI, StakingContract_ABI, GameRewards_ABI, NFTClaim_ABI, SADCoin_ABI } from "@/lib/contracts"
 import { NetworkSwitcher } from "./NetworkSwitcher"
 
-export function DebugPanel() {
+interface DebugPanelProps {
+  useAWS?: boolean
+  setUseAWS?: (value: boolean) => void
+}
+
+export function DebugPanel({ useAWS = false, setUseAWS }: DebugPanelProps = {}) {
   const { address, isConnected, chain } = useAccount()
   const { data: ethBalance } = useBalance({ address })
   
@@ -486,6 +491,53 @@ export function DebugPanel() {
         <div>Your Sessions: {playerSessions && Array.isArray(playerSessions) ? playerSessions.length : "0"}</div>
         <div>Current Session: {currentSessionId ? currentSessionId.toString() : "None"}</div>
       </div>
+
+      {/* AI Provider Selection */}
+      {setUseAWS && (
+        <div className="mb-3">
+          <div className="text-cyan-400">AI PROVIDER SELECTION:</div>
+          <div className="flex items-center gap-4 mt-1">
+            <label className="flex items-center gap-2">
+              <input
+                type="radio"
+                name="aiProvider"
+                value="gemini"
+                checked={!useAWS}
+                onChange={() => setUseAWS(false)}
+                className="text-green-400"
+              />
+              <span>Gemini (Original)</span>
+            </label>
+            <label className="flex items-center gap-2">
+              <input
+                type="radio"
+                name="aiProvider"
+                value="aws"
+                checked={useAWS}
+                onChange={() => setUseAWS(true)}
+                className="text-green-400"
+              />
+              <span>AWS Bedrock (Multi-Model)</span>
+            </label>
+          </div>
+          
+          <div className="mt-2 text-xs">
+            {!useAWS ? (
+              <div className="text-green-500">
+                <div>Officer: Gemini 1.5 Flash (temp: 0.3)</div>
+                <div>Agent: Gemini 1.5 Flash (temp: 0.5)</div>
+                <div>Monkey: Gemini 1.5 Flash (temp: 0.9)</div>
+              </div>
+            ) : (
+              <div className="text-cyan-500">
+                <div>Officer: Claude 3.5 Sonnet (temp: 0.3, tokens: 350)</div>
+                <div>Agent: Claude 3 Haiku (temp: 0.5, tokens: 400)</div>
+                <div>Monkey: Llama 3 70B (temp: 0.8, tokens: 300)</div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Purchase Testing */}
       <div className="mb-3">

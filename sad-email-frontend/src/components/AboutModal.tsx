@@ -177,7 +177,7 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
             <h4 className="text-orange-400 font-bold mb-2">OPTIMAL FRUSTRATION POINT</h4>
             <div className="text-sm text-orange-300 space-y-1">
               <p>
-                • <strong>Too Easy:</strong> Players stay in mini-games forever
+                • <strong>Too Easy:</strong> Game is not fun
               </p>
               <p>
                 • <strong>Too Hard:</strong> Players rage quit

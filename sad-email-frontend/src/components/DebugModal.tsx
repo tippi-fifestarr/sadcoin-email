@@ -19,6 +19,8 @@ interface DebugModalProps {
     feelsBalance?: string
     feelsLoading?: boolean
     isConnected?: boolean
+    useAWS?: boolean
+    setUseAWS?: (value: boolean) => void
   }
   gameState?: string
 }
@@ -127,7 +129,10 @@ export function DebugModal({ debugInfo, gameState }: DebugModalProps) {
           
           <PriceCalculator />
           <SimpleTest />
-          <DebugPanel />
+          <DebugPanel
+            useAWS={debugInfo?.useAWS}
+            setUseAWS={debugInfo?.setUseAWS}
+          />
         </div>
       </div>
     </div>
