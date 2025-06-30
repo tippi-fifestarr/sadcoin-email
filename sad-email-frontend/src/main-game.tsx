@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card"
 import AboutModal from "./components/AboutModal"
 import CRTContainer from "./components/CRTContainer"
 import NavBar from "./components/NavBar"
+import NetworkStatus from "./components/NetworkStatus"
 import { GameState, Character, Email } from "@/types/game"
 import { emails } from "@/data/gameData"
 import {
@@ -16,7 +17,7 @@ import {
   formatFEELSBalance
 } from "@/hooks/useContracts"
 import { useReadContract } from "wagmi"
-import { SEPOLIA_CONTRACTS } from "@/lib/contracts"
+import { getContracts } from "@/lib/contracts"
 import { generateEmail, EmailGenerationResponse, EmailContent } from "@/lib/gemini"
 
 // Import screen components
@@ -43,6 +44,10 @@ import {
 export default function Component() {
   const { address, isConnected } = useAccount()
   const chainId = useChainId()
+  
+  // Get network-aware contracts
+  const contracts = getContracts(chainId)
+  
   const [gameState, setGameState] = useState<GameState>("login")
   const [selectedEmail, setSelectedEmail] = useState<Email | null>(null)
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null)
@@ -59,7 +64,7 @@ export default function Component() {
 
   // Direct contract test
   const { data: directSadBalance, error: directSadError, isLoading: directSadLoading } = useReadContract({
-    address: SEPOLIA_CONTRACTS.SADCoin,
+    address: contracts.SADCoin,
     abi: [
       {
         "inputs": [{"internalType": "address", "name": "account", "type": "address"}],
@@ -89,6 +94,7 @@ export default function Component() {
     isConnected,
     chainId,
     isOnSepolia: chainId === 11155111,
+    isOnAvalancheFuji: chainId === 43113,
     sadBalance: typeof sadBalance === 'bigint' ? sadBalance.toString() : sadBalance,
     feelsBalance: typeof feelsBalance === 'bigint' ? feelsBalance.toString() : feelsBalance,
     directSadBalance: typeof directSadBalance === 'bigint' ? directSadBalance.toString() : directSadBalance,
@@ -100,17 +106,17 @@ export default function Component() {
     directSadLoading,
     formattedSad: sadCoins,
     formattedFeels: feels,
-    contractAddresses: {
-      SADCoin: "0xace84066b7e68f636dac3c3438975de22cf4af20",
-      FEELS: "0xe5180fa5acaf05717d49bf2ec4f6fd0261db92b2"
-    }
+    currentNetworkContracts: contracts
   })
 
   // Test network connectivity
   useEffect(() => {
-    if (isConnected && chainId === 11155111) {
-      console.log("Testing Sepolia connectivity...")
-      fetch('https://sepolia.drpc.org', {
+    if (isConnected && (chainId === 11155111 || chainId === 43113)) {
+      const networkName = chainId === 43113 ? 'Avalanche Fuji' : 'Sepolia'
+      const rpcUrl = chainId === 43113 ? 'https://api.avax-test.network/ext/bc/C/rpc' : 'https://sepolia.drpc.org'
+      
+      console.log(`Testing ${networkName} connectivity...`)
+      fetch(rpcUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -122,16 +128,16 @@ export default function Component() {
       })
       .then(response => response.json())
       .then(data => {
-        console.log("Sepolia RPC response:", data)
+        console.log(`${networkName} RPC response:`, data)
       })
       .catch(error => {
-        console.error("Sepolia RPC error:", error)
+        console.error(`${networkName} RPC error:`, error)
       })
 
       // Test contract addresses
       console.log("Testing contract addresses...")
       const testContract = (address: string, name: string) => {
-        fetch('https://sepolia.drpc.org', {
+        fetch(rpcUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -154,21 +160,21 @@ export default function Component() {
         })
       }
 
-      testContract(SEPOLIA_CONTRACTS.SADCoin, 'SADCoin')
-      testContract(SEPOLIA_CONTRACTS.FEELS, 'FEELS')
-      testContract(SEPOLIA_CONTRACTS.ConversionContract, 'ConversionContract')
+      testContract(contracts.SADCoin, 'SADCoin')
+      testContract(contracts.FEELS, 'FEELS')
+      testContract(contracts.ConversionContract, 'ConversionContract')
 
       // Test user's balance directly
       if (address) {
         console.log("Testing user balance...")
-        fetch('https://sepolia.drpc.org', {
+        fetch(rpcUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             jsonrpc: '2.0',
             method: 'eth_call',
             params: [{
-              to: SEPOLIA_CONTRACTS.SADCoin,
+              to: contracts.SADCoin,
               data: '0x70a08231' + '000000000000000000000000' + address.slice(2)
             }, 'latest'],
             id: 1
@@ -445,6 +451,9 @@ export default function Component() {
         feelsBalance={feels}
         onAboutClick={() => setIsAboutModalOpen(true)}
       />
+      
+      {/* Network Status Component for testing */}
+      <NetworkStatus />
       <div className="bg-black" style={{ minHeight: "calc(100vh - 70px)" }}>
         {/* Monitor Area */}
         <CRTContainer>

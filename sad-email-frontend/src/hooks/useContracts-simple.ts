@@ -1,20 +1,12 @@
 "use client"
 import { useReadContract, useWriteContract, useWatchContractEvent, useChainId } from "wagmi"
 import { parseEther, formatEther } from "viem"
-import { getContracts, SEPOLIA_CONTRACTS, FUJI_CONTRACTS, SADCoin_ABI, FEELS_ABI, ConversionContract_ABI, GameRewards_ABI, StakingContract_ABI, NFTClaim_ABI } from "@/lib/contracts"
+import { getContracts, SADCoin_ABI, FEELS_ABI, ConversionContract_ABI, GameRewards_ABI, StakingContract_ABI, NFTClaim_ABI } from "@/lib/contracts"
 
 // Hook to get current network contracts
 function useNetworkContracts() {
   const chainId = useChainId()
-  // Default to Fuji contracts, fallback to Sepolia for compatibility
-  if (chainId === 43113) {
-    return FUJI_CONTRACTS
-  } else if (chainId === 11155111) {
-    return SEPOLIA_CONTRACTS
-  } else {
-    // Default to Fuji for unknown networks
-    return FUJI_CONTRACTS
-  }
+  return getContracts(chainId)
 }
 
 // SADCoin contract hooks
@@ -22,18 +14,10 @@ export function useSADCoinBalance(address?: `0x${string}`) {
   const contracts = useNetworkContracts()
   const result = useReadContract({
     address: contracts.SADCoin,
-    abi: [
-      {
-        "inputs": [{"internalType": "address", "name": "account", "type": "address"}],
-        "name": "balanceOf",
-        "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
-        "stateMutability": "view",
-        "type": "function"
-      }
-    ],
+    abi: SADCoin_ABI,
     functionName: 'balanceOf',
     args: address ? [address] : undefined,
-    query: {
+    query: { 
       enabled: !!address,
       refetchInterval: 5000, // Refresh every 5 seconds
       retry: 1,
@@ -81,20 +65,21 @@ export function useApproveSAD() {
 }
 
 export function useSADCoinInfo() {
+  const contracts = useNetworkContracts()
   const name = useReadContract({
-    address: useNetworkContracts().SADCoin,
+    address: contracts.SADCoin,
     abi: SADCoin_ABI,
     functionName: 'name'
   });
 
   const symbol = useReadContract({
-    address: useNetworkContracts().SADCoin,
+    address: contracts.SADCoin,
     abi: SADCoin_ABI,
     functionName: 'symbol'
   });
 
   const totalSupply = useReadContract({
-    address: useNetworkContracts().SADCoin,
+    address: contracts.SADCoin,
     abi: SADCoin_ABI,
     functionName: 'totalSupply'
   });
@@ -107,15 +92,7 @@ export function useFEELSBalance(address?: `0x${string}`) {
   const contracts = useNetworkContracts()
   const result = useReadContract({
     address: contracts.FEELS,
-    abi: [
-      {
-        "inputs": [{"internalType": "address", "name": "account", "type": "address"}],
-        "name": "balanceOf",
-        "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
-        "stateMutability": "view",
-        "type": "function"
-      }
-    ],
+    abi: FEELS_ABI,
     functionName: 'balanceOf',
     args: address ? [address] : undefined,
     query: { 
@@ -163,8 +140,9 @@ export function useFeelingIntensity(address?: `0x${string}`) {
 
 // ConversionContract hooks
 export function useConversionRate() {
+  const contracts = useNetworkContracts()
   return useReadContract({
-    address: useNetworkContracts().ConversionContract,
+    address: contracts.ConversionContract,
     abi: ConversionContract_ABI,
     functionName: 'currentConversionRate',
     query: { refetchInterval: 10000 } // Check every 10 seconds
@@ -172,18 +150,20 @@ export function useConversionRate() {
 }
 
 export function useConversionInfo() {
+  const contracts = useNetworkContracts()
   return useReadContract({
-    address: useNetworkContracts().ConversionContract,
+    address: contracts.ConversionContract,
     abi: ConversionContract_ABI,
     functionName: 'getConversionInfo'
   });
 }
 
 export function usePurchaseCalculation(ethAmount: string) {
+  const contracts = useNetworkContracts()
   const ethWei = ethAmount ? parseEther(ethAmount) : BigInt(0);
   
   return useReadContract({
-    address: useNetworkContracts().ConversionContract,
+    address: contracts.ConversionContract,
     abi: ConversionContract_ABI,
     functionName: 'calculatePurchaseAmount',
     args: [ethWei],
@@ -195,8 +175,9 @@ export function usePurchaseCalculation(ethAmount: string) {
 }
 
 export function useLastPurchaseTime(address?: `0x${string}`) {
+  const contracts = useNetworkContracts()
   return useReadContract({
-    address: useNetworkContracts().ConversionContract,
+    address: contracts.ConversionContract,
     abi: ConversionContract_ABI,
     functionName: 'lastPurchaseTime',
     args: address ? [address] : undefined,
@@ -205,8 +186,9 @@ export function useLastPurchaseTime(address?: `0x${string}`) {
 }
 
 export function useDailyConversionStatus(address?: `0x${string}`) {
+  const contracts = useNetworkContracts()
   return useReadContract({
-    address: useNetworkContracts().ConversionContract,
+    address: contracts.ConversionContract,
     abi: ConversionContract_ABI,
     functionName: 'getDailyConversionStatus',
     args: address ? [address] : undefined,
@@ -225,8 +207,9 @@ export function useConvertFeelsToSad() {
 
 // Event watching hooks
 export function useWatchSADTransfers(address?: `0x${string}`, onTransfer?: () => void) {
+  const contracts = useNetworkContracts()
   useWatchContractEvent({
-    address: useNetworkContracts().SADCoin,
+    address: contracts.SADCoin,
     abi: SADCoin_ABI,
     eventName: 'Transfer',
     args: { to: address },
@@ -238,8 +221,9 @@ export function useWatchSADTransfers(address?: `0x${string}`, onTransfer?: () =>
 }
 
 export function useWatchSadnessPurchases(address?: `0x${string}`, onPurchase?: () => void) {
+  const contracts = useNetworkContracts()
   useWatchContractEvent({
-    address: useNetworkContracts().ConversionContract,
+    address: contracts.ConversionContract,
     abi: ConversionContract_ABI,
     eventName: 'SadCoinPurchased',
     args: { buyer: address },
@@ -300,8 +284,9 @@ export function useCompleteGame() {
 }
 
 export function usePlayerSessions(address?: `0x${string}`) {
+  const contracts = useNetworkContracts()
   return useReadContract({
-    address: useNetworkContracts().GameRewards,
+    address: contracts.GameRewards,
     abi: GameRewards_ABI,
     functionName: 'getPlayerSessions',
     args: address ? [address] : undefined,
@@ -310,8 +295,9 @@ export function usePlayerSessions(address?: `0x${string}`) {
 }
 
 export function useSessionDetails(sessionId?: bigint) {
+  const contracts = useNetworkContracts()
   return useReadContract({
-    address: useNetworkContracts().GameRewards,
+    address: contracts.GameRewards,
     abi: GameRewards_ABI,
     functionName: 'getSessionDetails',
     args: sessionId !== undefined ? [sessionId] : undefined,
@@ -320,8 +306,9 @@ export function useSessionDetails(sessionId?: bigint) {
 }
 
 export function useGameStats() {
+  const contracts = useNetworkContracts()
   return useReadContract({
-    address: useNetworkContracts().GameRewards,
+    address: contracts.GameRewards,
     abi: GameRewards_ABI,
     functionName: 'getStats'
   });
@@ -329,8 +316,9 @@ export function useGameStats() {
 
 // StakingContract hooks
 export function useStakeInfo(address?: `0x${string}`) {
+  const contracts = useNetworkContracts()
   return useReadContract({
-    address: useNetworkContracts().StakingContract,
+    address: contracts.StakingContract,
     abi: StakingContract_ABI,
     functionName: 'stakes',
     args: address ? [address] : undefined,
@@ -339,8 +327,9 @@ export function useStakeInfo(address?: `0x${string}`) {
 }
 
 export function usePendingRewards(address?: `0x${string}`) {
+  const contracts = useNetworkContracts()
   return useReadContract({
-    address: useNetworkContracts().StakingContract,
+    address: contracts.StakingContract,
     abi: StakingContract_ABI,
     functionName: 'pendingRewards',
     args: address ? [address] : undefined,
@@ -349,28 +338,30 @@ export function usePendingRewards(address?: `0x${string}`) {
 }
 
 export function useTotalStaked() {
+  const contracts = useNetworkContracts()
   return useReadContract({
-    address: useNetworkContracts().StakingContract,
+    address: contracts.StakingContract,
     abi: StakingContract_ABI,
     functionName: 'totalStaked'
   });
 }
 
 export function useStakingConstants() {
+  const contracts = useNetworkContracts()
   const rewardRate = useReadContract({
-    address: useNetworkContracts().StakingContract,
+    address: contracts.StakingContract,
     abi: StakingContract_ABI,
     functionName: 'REWARD_RATE'
   });
 
   const minimumStake = useReadContract({
-    address: useNetworkContracts().StakingContract,
+    address: contracts.StakingContract,
     abi: StakingContract_ABI,
     functionName: 'MINIMUM_STAKE'
   });
 
   const unstakeDelay = useReadContract({
-    address: useNetworkContracts().StakingContract,
+    address: contracts.StakingContract,
     abi: StakingContract_ABI,
     functionName: 'UNSTAKE_DELAY'
   });
@@ -396,8 +387,9 @@ export function useHarvestFeelings() {
 
 // NFTClaim contract hooks
 export function useNFTBalance(address?: `0x${string}`) {
+  const contracts = useNetworkContracts()
   return useReadContract({
-    address: useNetworkContracts().NFTClaim,
+    address: contracts.NFTClaim,
     abi: NFTClaim_ABI,
     functionName: 'balanceOf',
     args: address ? [address] : undefined,
@@ -406,8 +398,9 @@ export function useNFTBalance(address?: `0x${string}`) {
 }
 
 export function useUserTotalSadness(address?: `0x${string}`) {
+  const contracts = useNetworkContracts()
   return useReadContract({
-    address: useNetworkContracts().NFTClaim,
+    address: contracts.NFTClaim,
     abi: NFTClaim_ABI,
     functionName: 'getUserTotalSadness',
     args: address ? [address] : undefined,
@@ -416,8 +409,9 @@ export function useUserTotalSadness(address?: `0x${string}`) {
 }
 
 export function useHasAchievement(address?: `0x${string}`, achievement?: number) {
+  const contracts = useNetworkContracts()
   return useReadContract({
-    address: useNetworkContracts().NFTClaim,
+    address: contracts.NFTClaim,
     abi: NFTClaim_ABI,
     functionName: 'hasAchievement',
     args: address && achievement !== undefined ? [address, achievement] : undefined,
@@ -426,8 +420,9 @@ export function useHasAchievement(address?: `0x${string}`, achievement?: number)
 }
 
 export function useAchievementInfo(achievement?: number) {
+  const contracts = useNetworkContracts()
   return useReadContract({
-    address: useNetworkContracts().NFTClaim,
+    address: contracts.NFTClaim,
     abi: NFTClaim_ABI,
     functionName: 'getAchievementInfo',
     args: achievement !== undefined ? [achievement] : undefined,
@@ -436,14 +431,15 @@ export function useAchievementInfo(achievement?: number) {
 }
 
 export function useNFTSupplyInfo() {
+  const contracts = useNetworkContracts()
   const nextTokenId = useReadContract({
-    address: useNetworkContracts().NFTClaim,
+    address: contracts.NFTClaim,
     abi: NFTClaim_ABI,
     functionName: 'nextTokenId'
   });
 
   const maxSupply = useReadContract({
-    address: useNetworkContracts().NFTClaim,
+    address: contracts.NFTClaim,
     abi: NFTClaim_ABI,
     functionName: 'MAX_SUPPLY'
   });
@@ -457,8 +453,9 @@ export function useRequestNFTClaim() {
 
 // Event watching for new contracts
 export function useWatchGameRewards(address?: `0x${string}`, onGameComplete?: () => void) {
+  const contracts = useNetworkContracts()
   useWatchContractEvent({
-    address: useNetworkContracts().GameRewards,
+    address: contracts.GameRewards,
     abi: GameRewards_ABI,
     eventName: 'SadRewardCalculated',
     args: { player: address },
@@ -470,8 +467,9 @@ export function useWatchGameRewards(address?: `0x${string}`, onGameComplete?: ()
 }
 
 export function useWatchStakingRewards(address?: `0x${string}`, onHarvest?: () => void) {
+  const contracts = useNetworkContracts()
   useWatchContractEvent({
-    address: useNetworkContracts().StakingContract,
+    address: contracts.StakingContract,
     abi: StakingContract_ABI,
     eventName: 'FeelingsHarvested',
     args: { staker: address },
@@ -483,8 +481,9 @@ export function useWatchStakingRewards(address?: `0x${string}`, onHarvest?: () =
 }
 
 export function useWatchNFTClaims(address?: `0x${string}`, onClaim?: () => void) {
+  const contracts = useNetworkContracts()
   useWatchContractEvent({
-    address: useNetworkContracts().NFTClaim,
+    address: contracts.NFTClaim,
     abi: NFTClaim_ABI,
     eventName: 'NFTClaimed',
     args: { claimer: address },

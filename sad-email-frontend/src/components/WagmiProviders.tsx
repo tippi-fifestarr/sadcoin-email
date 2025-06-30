@@ -1,21 +1,22 @@
 "use client"
 import { WagmiProvider, createConfig, http } from "wagmi"
-import { sepolia } from "wagmi/chains"
+import { sepolia, avalancheFuji } from "wagmi/chains"
 import { metaMask, walletConnect } from "wagmi/connectors"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { useState } from "react"
 
 const projectId = process.env.NEXT_PUBLIC_PROJECT_ID || ""
 
-// Sepolia testnet only for development and testing
+// Multi-network support: Avalanche Fuji (primary) and Sepolia (fallback)
 const wagmiConfig = createConfig({
-  chains: [sepolia],
+  chains: [avalancheFuji, sepolia],
   connectors: [
     metaMask(),
     walletConnect({ projectId })
   ],
   transports: {
-    [sepolia.id]: http()
+    [avalancheFuji.id]: http('https://api.avax-test.network/ext/bc/C/rpc'),
+    [sepolia.id]: http('https://sepolia.drpc.org')
   }
 })
 

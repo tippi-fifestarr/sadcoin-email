@@ -2,7 +2,7 @@
 
 import { createAppKit } from '@reown/appkit/react'
 import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
-import { mainnet, sepolia } from '@reown/appkit/networks'
+import { sepolia, avalancheFuji } from '@reown/appkit/networks'
 import { walletConnect, coinbaseWallet, injected } from 'wagmi/connectors'
 import { http, WagmiProvider, cookieToInitialState } from 'wagmi'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -27,11 +27,11 @@ const connectors = [
   coinbaseWallet({ appName: metadata.name, appLogoUrl: metadata.icons[0] })
 ]
 
-const networks = [mainnet, sepolia]
+const networks = [avalancheFuji, sepolia]
 
 const wagmiAdapter = new WagmiAdapter({
-  transports: { 
-    [mainnet.id]: http(),
+  transports: {
+    [avalancheFuji.id]: http('https://api.avax-test.network/ext/bc/C/rpc'),
     [sepolia.id]: http('https://sepolia.drpc.org')
   },
   connectors,
@@ -45,7 +45,7 @@ const config = wagmiAdapter.wagmiConfig
 createAppKit({
   adapters: [wagmiAdapter],
   projectId,
-  networks: [mainnet, sepolia],
+  networks: [avalancheFuji, sepolia],
   metadata,
   features: {
     email: false,
