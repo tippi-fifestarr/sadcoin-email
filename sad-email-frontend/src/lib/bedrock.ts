@@ -16,21 +16,23 @@ export interface ModelConfig {
 export const BEDROCK_MODELS = {
   officer: {
     modelId: "anthropic.claude-3-haiku-20240307-v1:0",
-    // Future: "us.anthropic.claude-opus-4-20250514-v1:0" (when quota allows)
-    maxTokens: 150,
+    // Available: "anthropic.claude-3-5-sonnet-20240620-v1:0" (ready to test)
+    // Available: "us.anthropic.claude-opus-4-20250514-v1:0" (inference profile)
+    maxTokens: 350, // Increased to prevent truncation
     temperature: 0.2, // Conservative, authoritative responses
     topP: 0.8
   },
   agent: {
-    modelId: "anthropic.claude-3-haiku-20240307-v1:0",
-    maxTokens: 200,
+    modelId: "anthropic.claude-3-haiku-20240307-v1:0", // Keep on Haiku - working well!
+    maxTokens: 400, // Increased to prevent truncation
     temperature: 0.5, // Balanced, detailed responses
     topP: 0.9
   },
   monkey: {
     modelId: "anthropic.claude-3-haiku-20240307-v1:0",
-    // Future: "us.meta.llama3-1-70b-instruct-v1:0" (when quota allows)
-    maxTokens: 120,
+    // Available: "meta.llama3-70b-instruct-v1:0" (ready to test)
+    // Available: "us.meta.llama3-1-70b-instruct-v1:0" (inference profile)
+    maxTokens: 300, // Increased to prevent truncation
     temperature: 0.9, // Creative, chaotic responses
     topP: 0.95
   }
@@ -54,7 +56,17 @@ export class BedrockEmailGenerator {
   async generateForPersona(persona: PersonaType, prompt: string, userInput: string) {
     const modelConfig = BEDROCK_MODELS[persona];
     
-    const fullPrompt = `${prompt}\n\nUser's sad content/idea: "${userInput}"\n\nPlease write a professional email based on the user's content following the character's personality and style. Format your response as JSON with "subject" and "body" fields.`;
+    const fullPrompt = `${prompt}
+
+User's sad content/idea: "${userInput}"
+
+Please write a professional email based on the user's content. The email should:
+1. Have a clear, professional subject line
+2. Follow the character's personality and style
+3. Be well-formatted and appropriate for business communication
+4. Transform the user's sad content into a proper email
+
+Format your response as JSON with "subject" and "body" fields.`;
 
     const payload = this.buildPayload(modelConfig.modelId, fullPrompt, modelConfig);
     

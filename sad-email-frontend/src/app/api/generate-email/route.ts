@@ -60,16 +60,12 @@ async function generateWithBedrock(userInput: string) {
   const officerPrompt = fs.readFileSync(path.join(process.cwd(), 'public/prompt/officer_prompt.md'), 'utf8')
   const monkeyPrompt = fs.readFileSync(path.join(process.cwd(), 'public/prompt/monkey_prompt.md'), 'utf8')
 
-  // Generate emails sequentially to avoid AWS Bedrock rate limits
-  const agentResponse = await bedrockGenerator.generateForPersona('agent', agentPrompt, userInput);
-  
-  // Add delay between calls to avoid throttling
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  const officerResponse = await bedrockGenerator.generateForPersona('officer', officerPrompt, userInput);
-  
-  // Add delay between calls to avoid throttling
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  const monkeyResponse = await bedrockGenerator.generateForPersona('monkey', monkeyPrompt, userInput);
+  // Generate emails in parallel - foundation models don't have throttling issues
+  const [agentResponse, officerResponse, monkeyResponse] = await Promise.all([
+    bedrockGenerator.generateForPersona('agent', agentPrompt, userInput),
+    bedrockGenerator.generateForPersona('officer', officerPrompt, userInput),
+    bedrockGenerator.generateForPersona('monkey', monkeyPrompt, userInput)
+  ]);
 
   return NextResponse.json({
     agentInitialEmail: agentResponse,

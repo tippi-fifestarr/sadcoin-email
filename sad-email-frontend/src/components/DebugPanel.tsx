@@ -506,7 +506,7 @@ export function DebugPanel({ useAWS = false, setUseAWS }: DebugPanelProps = {}) 
                 onChange={() => setUseAWS(false)}
                 className="text-green-400"
               />
-              <span>Gemini (Current)</span>
+              <span>Gemini (Original)</span>
             </label>
             <label className="flex items-center gap-2">
               <input
@@ -521,13 +521,21 @@ export function DebugPanel({ useAWS = false, setUseAWS }: DebugPanelProps = {}) 
             </label>
           </div>
           
-          {useAWS && (
-            <div className="mt-2 text-xs text-green-500">
-              <div>Officer: Claude Opus 4 (Maximum Intelligence, Structured)</div>
-              <div>Agent: Claude 3 Haiku (Fast, Detailed)</div>
-              <div>Monkey: Llama 3.1 70B (Creative, Chaotic)</div>
-            </div>
-          )}
+          <div className="mt-2 text-xs">
+            {!useAWS ? (
+              <div className="text-green-500">
+                <div>Officer: Gemini 1.5 Flash (temp: 0.3)</div>
+                <div>Agent: Gemini 1.5 Flash (temp: 0.5)</div>
+                <div>Monkey: Gemini 1.5 Flash (temp: 0.9)</div>
+              </div>
+            ) : (
+              <div className="text-cyan-500">
+                <div>Officer: Claude 3 Haiku (temp: 0.3, tokens: 350)</div>
+                <div>Agent: Claude 3 Haiku (temp: 0.5, tokens: 400)</div>
+                <div>Monkey: Claude 3 Haiku (temp: 0.9, tokens: 300)</div>
+              </div>
+            )}
+          </div>
         </div>
       )}
 
