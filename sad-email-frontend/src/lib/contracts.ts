@@ -53,6 +53,27 @@ export const SADCoin_ABI = [
     "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
     "stateMutability": "view",
     "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "name",
+    "outputs": [{"internalType": "string", "name": "", "type": "string"}],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "symbol",
+    "outputs": [{"internalType": "string", "name": "", "type": "string"}],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "totalSupply",
+    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+    "stateMutability": "view",
+    "type": "function"
   }
 ] as const;
 
@@ -67,6 +88,13 @@ export const FEELS_ABI = [
   {
     "inputs": [{"internalType": "address", "name": "account", "type": "address"}],
     "name": "getEmotionalDamage",
+    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{"internalType": "address", "name": "account", "type": "address"}],
+    "name": "calculateFeelingIntensity",
     "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
     "stateMutability": "view",
     "type": "function"
@@ -111,6 +139,26 @@ export const ConversionContract_ABI = [
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getConversionInfo",
+    "outputs": [
+      {"internalType": "uint256", "name": "rate", "type": "uint256"},
+      {"internalType": "uint256", "name": "lastUpdate", "type": "uint256"}
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{"internalType": "address", "name": "user", "type": "address"}],
+    "name": "getDailyConversionStatus",
+    "outputs": [
+      {"internalType": "uint256", "name": "convertedToday", "type": "uint256"},
+      {"internalType": "bool", "name": "canConvert", "type": "bool"}
+    ],
+    "stateMutability": "view",
+    "type": "function"
   }
 ] as const;
 
@@ -130,6 +178,34 @@ export const GameRewards_ABI = [
     "name": "completeGame",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getStats",
+    "outputs": [
+      {"internalType": "uint256", "name": "gamesPlayed", "type": "uint256"},
+      {"internalType": "uint256", "name": "totalFeelsDistributed", "type": "uint256"}
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{"internalType": "address", "name": "player", "type": "address"}],
+    "name": "getPlayerSessions",
+    "outputs": [{"internalType": "uint256[]", "name": "", "type": "uint256[]"}],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{"internalType": "uint256", "name": "sessionId", "type": "uint256"}],
+    "name": "getSessionDetails",
+    "outputs": [
+      {"internalType": "address", "name": "player", "type": "address"},
+      {"internalType": "uint256", "name": "score", "type": "uint256"},
+      {"internalType": "uint256", "name": "timestamp", "type": "uint256"}
+    ],
+    "stateMutability": "view",
     "type": "function"
   }
 ] as const;
@@ -155,6 +231,54 @@ export const StakingContract_ABI = [
     "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
     "stateMutability": "view",
     "type": "function"
+  },
+  {
+    "inputs": [{"internalType": "address", "name": "staker", "type": "address"}],
+    "name": "stakes",
+    "outputs": [
+      {"internalType": "uint256", "name": "amount", "type": "uint256"},
+      {"internalType": "uint256", "name": "startTime", "type": "uint256"},
+      {"internalType": "uint256", "name": "lastHarvestTime", "type": "uint256"},
+      {"internalType": "uint256", "name": "accumulatedRewards", "type": "uint256"},
+      {"internalType": "bool", "name": "unstakeRequested", "type": "bool"}
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "requestUnstake",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "totalStaked",
+    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "REWARD_RATE",
+    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "MINIMUM_STAKE",
+    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "UNSTAKE_DELAY",
+    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+    "stateMutability": "view",
+    "type": "function"
   }
 ] as const;
 
@@ -173,6 +297,48 @@ export const NFTClaim_ABI = [
   {
     "inputs": [{"internalType": "address", "name": "owner", "type": "address"}],
     "name": "balanceOf",
+    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{"internalType": "address", "name": "user", "type": "address"}],
+    "name": "getUserTotalSadness",
+    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {"internalType": "address", "name": "user", "type": "address"},
+      {"internalType": "uint8", "name": "achievement", "type": "uint8"}
+    ],
+    "name": "hasAchievement",
+    "outputs": [{"internalType": "bool", "name": "", "type": "bool"}],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{"internalType": "uint8", "name": "achievement", "type": "uint8"}],
+    "name": "getAchievementInfo",
+    "outputs": [
+      {"internalType": "string", "name": "name", "type": "string"},
+      {"internalType": "string", "name": "description", "type": "string"},
+      {"internalType": "uint256", "name": "sadnessValue", "type": "uint256"}
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "nextTokenId",
+    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "MAX_SUPPLY",
     "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
     "stateMutability": "view",
     "type": "function"

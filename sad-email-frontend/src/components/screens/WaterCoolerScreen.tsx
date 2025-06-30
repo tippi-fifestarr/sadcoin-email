@@ -160,7 +160,7 @@ export function WaterCoolerScreen({ onBack }: WaterCoolerScreenProps) {
 
   // Unstake request handler
   const handleRequestUnstake = async () => {
-    if (!address || !stakeInfo || (stakeInfo as any[])?.[0] === BigInt(0)) return
+    if (!address || !stakeInfo || !Array.isArray(stakeInfo) || stakeInfo[0] === BigInt(0)) return
     
     try {
       setStatus("Asking the water cooler to release your sadness... ⏰")

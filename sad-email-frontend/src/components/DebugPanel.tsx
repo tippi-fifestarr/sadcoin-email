@@ -284,7 +284,7 @@ export function DebugPanel() {
   }
 
   const handleRequestUnstake = async () => {
-    if (!address || !stakeInfo || (stakeInfo as any[])?.[0] === BigInt(0)) return
+    if (!address || !stakeInfo || !Array.isArray(stakeInfo) || stakeInfo[0] === BigInt(0)) return
     
     try {
       setStatus("Requesting unstake...")
@@ -581,7 +581,7 @@ export function DebugPanel() {
           </Button>
           <Button
             onClick={handleRequestUnstake}
-            disabled={isRequestingUnstake || isWrongNetwork || !stakeInfo || (stakeInfo as any[])?.[0] === BigInt(0)}
+            disabled={isRequestingUnstake || isWrongNetwork || !stakeInfo || !Array.isArray(stakeInfo) || stakeInfo[0] === BigInt(0)}
             className="bg-red-600 hover:bg-red-700 text-white text-xs px-3 py-1 h-auto"
           >
             {isRequestingUnstake ? "Requesting..." : "🔓 UNSTAKE"}
