@@ -52,6 +52,7 @@ export default function Component() {
   const [selectedEmailContent, setSelectedEmailContent] = useState<EmailContent | null>(null)
   const [selectedEmailSender, setSelectedEmailSender] = useState<string>("")
   const [isAboutModalOpen, setIsAboutModalOpen] = useState(false)
+  const [useAWS, setUseAWS] = useState(false) // AWS Bedrock toggle state
 
   // Web3 token balances
   const { data: sadBalance, error: sadError, isLoading: sadLoading } = useSADCoinBalance(address)
@@ -220,7 +221,8 @@ export default function Component() {
     
     try {
       const emailResponse = await generateEmail({
-        userInput
+        userInput,
+        useAWS // Pass the AWS toggle state
       })
 
       if (emailResponse.success) {
@@ -439,7 +441,9 @@ export default function Component() {
           sadError,
           directSadError,
           feelsBalance: feelsBalance?.toString(),
-          feelsLoading
+          feelsLoading,
+          useAWS,
+          setUseAWS
         }}
         sadBalance={sadCoins}
         feelsBalance={feels}

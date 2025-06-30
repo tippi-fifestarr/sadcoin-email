@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { GoogleGenAI } from "@google/genai"
+import { BedrockEmailGenerator } from '@/lib/bedrock'
 import fs from 'fs'
 import path from 'path'
 
@@ -10,7 +11,7 @@ const ai = new GoogleGenAI({
 
 export async function POST(request: NextRequest) {
   try {
-    const { userInput } = await request.json()
+    const { userInput, useAWS = false } = await request.json()
 
     if (!userInput) {
       return NextResponse.json(
@@ -19,36 +20,16 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    if (!process.env.GOOGLE_API_KEY) {
-      return NextResponse.json(
-        { error: 'GOOGLE_API_KEY is not configured' },
-        { status: 500 }
-      )
+    if (useAWS) {
+      return await generateWithBedrock(userInput);
+    } else {
+      return await generateWithGemini(userInput);
     }
 
-    // Read prompt files
-    const agentPrompt = fs.readFileSync(path.join(process.cwd(), 'public/prompt/agent_prompt.md'), 'utf8')
-    const officerPrompt = fs.readFileSync(path.join(process.cwd(), 'public/prompt/officer_prompt.md'), 'utf8')
-    const monkeyPrompt = fs.readFileSync(path.join(process.cwd(), 'public/prompt/monkey_prompt.md'), 'utf8')
-
-    // Generate all three emails in parallel
-    const [agentResponse, officerResponse, monkeyResponse] = await Promise.all([
-      generateEmailWithPrompt(agentPrompt, userInput),
-      generateEmailWithPrompt(officerPrompt, userInput),
-      generateEmailWithPrompt(monkeyPrompt, userInput)
-    ])
-
-    return NextResponse.json({
-      agentInitialEmail: agentResponse,
-      officerInitialEmail: officerResponse,
-      monkeyInitialEmail: monkeyResponse,
-      success: true
-    })
-
   } catch (error) {
-    console.error("Error generating emails with Gemini:", error)
+    console.error("Error generating emails:", error)
     return NextResponse.json(
-      { 
+      {
         agentInitialEmail: { subject: "Error", body: "Failed to generate agent email" },
         officerInitialEmail: { subject: "Error", body: "Failed to generate officer email" },
         monkeyInitialEmail: { subject: "Error", body: "Failed to generate monkey email" },
@@ -58,6 +39,74 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     )
   }
+}
+
+async function generateWithBedrock(userInput: string) {
+  if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) {
+    return NextResponse.json(
+      { error: 'AWS credentials not configured' },
+      { status: 500 }
+    )
+  }
+
+  const bedrockGenerator = new BedrockEmailGenerator({
+    region: process.env.AWS_REGION || 'us-east-1',
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  });
+
+  // Read prompt files
+  const agentPrompt = fs.readFileSync(path.join(process.cwd(), 'public/prompt/agent_prompt.md'), 'utf8')
+  const officerPrompt = fs.readFileSync(path.join(process.cwd(), 'public/prompt/officer_prompt.md'), 'utf8')
+  const monkeyPrompt = fs.readFileSync(path.join(process.cwd(), 'public/prompt/monkey_prompt.md'), 'utf8')
+
+  // Generate emails sequentially to avoid AWS Bedrock rate limits
+  const agentResponse = await bedrockGenerator.generateForPersona('agent', agentPrompt, userInput);
+  
+  // Add delay between calls to avoid throttling
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  const officerResponse = await bedrockGenerator.generateForPersona('officer', officerPrompt, userInput);
+  
+  // Add delay between calls to avoid throttling
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  const monkeyResponse = await bedrockGenerator.generateForPersona('monkey', monkeyPrompt, userInput);
+
+  return NextResponse.json({
+    agentInitialEmail: agentResponse,
+    officerInitialEmail: officerResponse,
+    monkeyInitialEmail: monkeyResponse,
+    success: true,
+    provider: 'aws-bedrock'
+  })
+}
+
+async function generateWithGemini(userInput: string) {
+  if (!process.env.GOOGLE_API_KEY) {
+    return NextResponse.json(
+      { error: 'GOOGLE_API_KEY is not configured' },
+      { status: 500 }
+    )
+  }
+
+  // Read prompt files
+  const agentPrompt = fs.readFileSync(path.join(process.cwd(), 'public/prompt/agent_prompt.md'), 'utf8')
+  const officerPrompt = fs.readFileSync(path.join(process.cwd(), 'public/prompt/officer_prompt.md'), 'utf8')
+  const monkeyPrompt = fs.readFileSync(path.join(process.cwd(), 'public/prompt/monkey_prompt.md'), 'utf8')
+
+  // Generate all three emails in parallel
+  const [agentResponse, officerResponse, monkeyResponse] = await Promise.all([
+    generateEmailWithPrompt(agentPrompt, userInput),
+    generateEmailWithPrompt(officerPrompt, userInput),
+    generateEmailWithPrompt(monkeyPrompt, userInput)
+  ])
+
+  return NextResponse.json({
+    agentInitialEmail: agentResponse,
+    officerInitialEmail: officerResponse,
+    monkeyInitialEmail: monkeyResponse,
+    success: true,
+    provider: 'gemini'
+  })
 }
 
 async function generateEmailWithPrompt(prompt: string, userInput: string) {
@@ -95,7 +144,7 @@ Format your response as JSON with "subject" and "body" fields.`
         body: parsed.body
       }
     }
-  } catch (e) {
+  } catch {
     // If JSON parsing fails, try to extract JSON from markdown code blocks
     const jsonMatch = responseText.match(/```json\s*(\{[\s\S]*?\})\s*```/)
     if (jsonMatch) {
@@ -107,7 +156,7 @@ Format your response as JSON with "subject" and "body" fields.`
             body: parsed.body
           }
         }
-      } catch (e2) {
+      } catch {
         // Continue to fallback
       }
     }

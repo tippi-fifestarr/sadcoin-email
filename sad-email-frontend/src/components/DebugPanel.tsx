@@ -45,7 +45,12 @@ import {
 import { SEPOLIA_CONTRACTS, ConversionContract_ABI, StakingContract_ABI, GameRewards_ABI, NFTClaim_ABI, SADCoin_ABI } from "@/lib/contracts"
 import { NetworkSwitcher } from "./NetworkSwitcher"
 
-export function DebugPanel() {
+interface DebugPanelProps {
+  useAWS?: boolean
+  setUseAWS?: (value: boolean) => void
+}
+
+export function DebugPanel({ useAWS = false, setUseAWS }: DebugPanelProps = {}) {
   const { address, isConnected, chain } = useAccount()
   const { data: ethBalance } = useBalance({ address })
   
@@ -486,6 +491,45 @@ export function DebugPanel() {
         <div>Your Sessions: {playerSessions && Array.isArray(playerSessions) ? playerSessions.length : "0"}</div>
         <div>Current Session: {currentSessionId ? currentSessionId.toString() : "None"}</div>
       </div>
+
+      {/* AI Provider Selection */}
+      {setUseAWS && (
+        <div className="mb-3">
+          <div className="text-cyan-400">AI PROVIDER SELECTION:</div>
+          <div className="flex items-center gap-4 mt-1">
+            <label className="flex items-center gap-2">
+              <input
+                type="radio"
+                name="aiProvider"
+                value="gemini"
+                checked={!useAWS}
+                onChange={() => setUseAWS(false)}
+                className="text-green-400"
+              />
+              <span>Gemini (Current)</span>
+            </label>
+            <label className="flex items-center gap-2">
+              <input
+                type="radio"
+                name="aiProvider"
+                value="aws"
+                checked={useAWS}
+                onChange={() => setUseAWS(true)}
+                className="text-green-400"
+              />
+              <span>AWS Bedrock (Multi-Model)</span>
+            </label>
+          </div>
+          
+          {useAWS && (
+            <div className="mt-2 text-xs text-green-500">
+              <div>Officer: Claude Opus 4 (Maximum Intelligence, Structured)</div>
+              <div>Agent: Claude 3 Haiku (Fast, Detailed)</div>
+              <div>Monkey: Llama 3.1 70B (Creative, Chaotic)</div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Purchase Testing */}
       <div className="mb-3">

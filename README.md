@@ -91,10 +91,28 @@ forge test
 
 ## 🤖 AI Integration
 
-### **AWS Bedrock** 
-[Coming Soon - Placeholder]
-- Multiple LLM personalities for each archetype
-- Dynamic email generation based on gameplay
+### **AWS Bedrock Multi-Model Architecture** ✅
+![AWS Bedrock Integration](./sad-email-frontend/public/bedrock.png)
+
+**Now Live!** Our sophisticated multi-model AI system leverages different foundation models for each corporate archetype:
+
+- **Officer**: Claude Opus 4 - Maximum intelligence for authoritative corporate responses
+- **Agent**: Claude 3 Haiku - Fast, efficient processing for detailed secretive communications
+- **Monkey**: Llama 3.1 70B - Creative chaos for brief, unpredictable emails
+
+**Features:**
+- Real-time model switching via debug panel
+- Personality-specific prompt engineering
+- Fallback to Google Gemini for reliability
+- Cost-optimized token usage per character
+
+**Implementation Files:**
+- 🔧 **[Bedrock Client Library](./sad-email-frontend/src/lib/bedrock.ts)** - Core AWS Bedrock integration
+- 🌐 **[Multi-Provider API Route](./sad-email-frontend/src/app/api/generate-email/route.ts)** - Handles both Gemini and Bedrock
+- 🎛️ **[Debug Panel](./sad-email-frontend/src/components/DebugPanel.tsx)** - Provider switching interface
+- 📝 **[Character Prompts](./sad-email-frontend/public/prompt/)** - Personality-specific AI prompts
+
+📋 **[Complete Integration Guide](./AWS_BEDROCK_INTEGRATION_PLAN.md)** - Detailed setup and implementation documentation
 
 ### **ElizaOS Integration**
 [Coming Soon - Placeholder]

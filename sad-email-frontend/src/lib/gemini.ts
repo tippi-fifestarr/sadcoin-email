@@ -1,7 +1,7 @@
-import { Character } from "@/types/game";
 
 export interface EmailGenerationRequest {
   userInput: string;
+  useAWS?: boolean; // Optional parameter for AWS Bedrock
 }
 
 export interface EmailGenerationResponse {
@@ -26,6 +26,7 @@ export async function generateEmail(request: EmailGenerationRequest): Promise<Em
       },
       body: JSON.stringify({
         userInput: request.userInput,
+        useAWS: request.useAWS || false
       }),
     });
 
