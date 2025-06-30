@@ -17,6 +17,8 @@
 ### 📹 Demo Video
 [Hackathon Submission Video](https://youtu.be/rPY2-gUEAUU) - The classic last minute adventure
 
+## [Avalanche Branch](https://github.com/tippi-fifestarr/sadcoin-email/tree/tippi/avalanche)
+
 ## 🏗️ Architecture
 
 ```
