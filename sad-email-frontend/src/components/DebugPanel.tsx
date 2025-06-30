@@ -530,9 +530,9 @@ export function DebugPanel({ useAWS = false, setUseAWS }: DebugPanelProps = {}) 
               </div>
             ) : (
               <div className="text-cyan-500">
-                <div>Officer: Claude 3 Haiku (temp: 0.3, tokens: 350)</div>
+                <div>Officer: Claude 3.5 Sonnet (temp: 0.3, tokens: 350)</div>
                 <div>Agent: Claude 3 Haiku (temp: 0.5, tokens: 400)</div>
-                <div>Monkey: Claude 3 Haiku (temp: 0.9, tokens: 300)</div>
+                <div>Monkey: Llama 3 70B (temp: 0.8, tokens: 300)</div>
               </div>
             )}
           </div>

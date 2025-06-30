@@ -131,6 +131,10 @@ Format your response as JSON with "subject" and "body" fields.`
 
   const responseText = response.text || ""
   
+  console.log(`\n=== RAW RESPONSE FROM GEMINI ===`);
+  console.log(responseText);
+  console.log(`=== END RAW RESPONSE ===\n`);
+  
   // Try to parse as JSON first
   try {
     const parsed = JSON.parse(responseText)

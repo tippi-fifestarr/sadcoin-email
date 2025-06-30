@@ -15,11 +15,11 @@ export interface ModelConfig {
 
 export const BEDROCK_MODELS = {
   officer: {
-    modelId: "anthropic.claude-3-haiku-20240307-v1:0",
-    // Available: "anthropic.claude-3-5-sonnet-20240620-v1:0" (ready to test)
+    modelId: "anthropic.claude-3-5-sonnet-20240620-v1:0", // Upgraded for superior reasoning
+    // Previous: "anthropic.claude-3-haiku-20240307-v1:0"
     // Available: "us.anthropic.claude-opus-4-20250514-v1:0" (inference profile)
     maxTokens: 350, // Increased to prevent truncation
-    temperature: 0.2, // Conservative, authoritative responses
+    temperature: 0.3, // Increased from 0.2 for better JSON formatting
     topP: 0.8
   },
   agent: {
@@ -29,11 +29,11 @@ export const BEDROCK_MODELS = {
     topP: 0.9
   },
   monkey: {
-    modelId: "anthropic.claude-3-haiku-20240307-v1:0",
-    // Available: "meta.llama3-70b-instruct-v1:0" (ready to test)
+    modelId: "meta.llama3-70b-instruct-v1:0", // Upgraded for creative chaos
+    // Previous: "anthropic.claude-3-haiku-20240307-v1:0"
     // Available: "us.meta.llama3-1-70b-instruct-v1:0" (inference profile)
     maxTokens: 300, // Increased to prevent truncation
-    temperature: 0.9, // Creative, chaotic responses
+    temperature: 0.8, // Decreased from 0.9 for better JSON formatting
     topP: 0.95
   }
 } as const;
@@ -66,7 +66,17 @@ Please write a professional email based on the user's content. The email should:
 3. Be well-formatted and appropriate for business communication
 4. Transform the user's sad content into a proper email
 
-Format your response as JSON with "subject" and "body" fields.`;
+IMPORTANT: Respond with ONLY a valid JSON object in this exact format:
+{
+  "subject": "your email subject here",
+  "body": "your complete email body here"
+}
+
+Do NOT include:
+- Bullet points or special formatting in the body
+- "TO:", "FROM:", or "Subject:" lines in the body
+- Multiple JSON objects or examples
+- Any text outside the JSON object`;
 
     const payload = this.buildPayload(modelConfig.modelId, fullPrompt, modelConfig);
     
@@ -130,16 +140,58 @@ Format your response as JSON with "subject" and "body" fields.`;
       responseText = llamaResponse.generation;
     }
 
+    console.log(`\n=== RAW RESPONSE FROM ${modelId} ===`);
+    console.log(responseText);
+    console.log(`=== END RAW RESPONSE ===\n`);
+
+    // Clean the response text first
+    let cleanedText = responseText.trim();
+    
+    // Remove markdown code blocks if present (for Llama models)
+    if (cleanedText.startsWith('```') && cleanedText.endsWith('```')) {
+      cleanedText = cleanedText.replace(/^```[\w]*\n?/, '').replace(/\n?```$/, '').trim();
+      console.log(`[${modelId}] Removed markdown code blocks`);
+    }
+    
+    // Remove control characters that break JSON parsing (for Claude models)
+    cleanedText = cleanedText.replace(/[\x00-\x1F\x7F]/g, '');
+    console.log(`[${modelId}] Cleaned control characters`);
+
     // Try to parse as JSON first
     try {
-      const parsed = JSON.parse(responseText);
+      const parsed = JSON.parse(cleanedText);
       if (parsed.subject && parsed.body) {
+        console.log(`[${modelId}] Successfully parsed JSON:`, parsed);
         return {
           subject: parsed.subject,
           body: parsed.body
         };
       }
-    } catch {
+    } catch (error) {
+      console.log(`[${modelId}] JSON parsing failed after cleaning:`, error);
+      console.log(`[${modelId}] Cleaned text was:`, cleanedText);
+      // For Llama models, try to extract the last valid JSON object
+      if (modelId.includes('meta.llama')) {
+        // Find all JSON-like objects in the response
+        const jsonMatches = responseText.match(/\{[^{}]*"subject"[^{}]*"body"[^{}]*\}/g);
+        if (jsonMatches && jsonMatches.length > 0) {
+          // Try the last (most complete) JSON object
+          for (let i = jsonMatches.length - 1; i >= 0; i--) {
+            try {
+              const parsed = JSON.parse(jsonMatches[i]);
+              if (parsed.subject && parsed.body && parsed.subject.trim() && parsed.body.trim()) {
+                return {
+                  subject: parsed.subject,
+                  body: parsed.body
+                };
+              }
+            } catch {
+              continue;
+            }
+          }
+        }
+      }
+      
       // If JSON parsing fails, try to extract JSON from markdown code blocks
       const jsonMatch = responseText.match(/```json\s*(\{[\s\S]*?\})\s*```/);
       if (jsonMatch) {
