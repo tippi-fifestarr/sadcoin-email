@@ -3,7 +3,8 @@
 > *A productivity tool disguised as a retro terminal game where writing emails becomes an adventure through corporate absurdity*
 
 [![Chainlink](https://img.shields.io/badge/Powered%20by-Chainlink-375BD2?style=for-the-badge)](https://chain.link)
-[![Sepolia](https://img.shields.io/badge/Network-Sepolia-green?style=for-the-badge)](https://sepolia.etherscan.io)
+[![Avalanche Fuji](https://img.shields.io/badge/Primary-Avalanche%20Fuji-E84142?style=for-the-badge)](https://testnet.snowtrace.io)
+[![Sepolia](https://img.shields.io/badge/Fallback-Sepolia-green?style=for-the-badge)](https://sepolia.etherscan.io)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 
 ## 🎯 Overview
@@ -11,10 +12,10 @@
 **Let's Write An Email** is a Web3-enabled productivity game that tricks you into writing emails while you think you're procrastinating. Navigate through four corporate archetypes (Officer, Agent, Monkey, Intern), play intentionally frustrating mini-games, and watch as AI transforms your gameplay into actual emails.
 
 ### 🔗 Live Demo
-[letswritean.email](https://www.letswritean.email) - Coming Soon
+[letswritean.email](https://www.letswritean.email) - Coming Soon (We had build issues)
 
 ### 📹 Demo Video
-[Hackathon Submission Video] - Coming Soon
+[Hackathon Submission Video](https://youtu.be/rPY2-gUEAUU) - The classic last minute adventure
 
 ## 🏗️ Architecture
 
@@ -70,7 +71,8 @@ Email verification for NFT achievements
 ### Prerequisites
 - Node.js 18+
 - MetaMask or Web3 wallet
-- Sepolia testnet ETH
+- Avalanche Fuji testnet AVAX (primary network)
+- Sepolia testnet ETH (fallback network)
 
 ### Quick Start
 ```bash
@@ -91,28 +93,10 @@ forge test
 
 ## 🤖 AI Integration
 
-### **AWS Bedrock Multi-Model Architecture** ✅
-![AWS Bedrock Integration](./sad-email-frontend/public/bedrock.png)
-
-**Now Live!** Our sophisticated multi-model AI system leverages different foundation models for each corporate archetype:
-
-- **Officer**: Claude Opus 4 - Maximum intelligence for authoritative corporate responses
-- **Agent**: Claude 3 Haiku - Fast, efficient processing for detailed secretive communications
-- **Monkey**: Llama 3.1 70B - Creative chaos for brief, unpredictable emails
-
-**Features:**
-- Real-time model switching via debug panel
-- Personality-specific prompt engineering
-- Fallback to Google Gemini for reliability
-- Cost-optimized token usage per character
-
-**Implementation Files:**
-- 🔧 **[Bedrock Client Library](./sad-email-frontend/src/lib/bedrock.ts)** - Core AWS Bedrock integration
-- 🌐 **[Multi-Provider API Route](./sad-email-frontend/src/app/api/generate-email/route.ts)** - Handles both Gemini and Bedrock
-- 🎛️ **[Debug Panel](./sad-email-frontend/src/components/DebugPanel.tsx)** - Provider switching interface
-- 📝 **[Character Prompts](./sad-email-frontend/public/prompt/)** - Personality-specific AI prompts
-
-📋 **[Complete Integration Guide](./AWS_BEDROCK_INTEGRATION_PLAN.md)** - Detailed setup and implementation documentation
+### **AWS Bedrock** 
+[Coming Soon - Placeholder]
+- Multiple LLM personalities for each archetype
+- Dynamic email generation based on gameplay
 
 ### **ElizaOS Integration**
 [Coming Soon - Placeholder]
@@ -123,11 +107,24 @@ forge test
 
 - **Frontend**: Next.js 14, React, TypeScript, TailwindCSS
 - **Smart Contracts**: Solidity 0.8.26, Foundry
-- **Blockchain**: Ethereum (Sepolia), Wagmi, Viem
+- **Blockchain**: Multi-network (Avalanche Fuji, Ethereum Sepolia), Wagmi, Viem
 - **Oracles**: Chainlink (VRF, Price Feeds, Automation, Functions)
 - **AI**: AWS Bedrock, ElizaOS [Coming Soon]
 
-## 📊 Contract Addresses (Sepolia)
+## 📊 Contract Addresses
+
+### Avalanche Fuji (Primary Network)
+
+| Contract | Address |
+|----------|---------|
+| SADCoin | `0x5FbDB2315678afecb367f032d93F642f64180aa3` |
+| FEELS | `0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512` |
+| StakingContract | `0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0` |
+| GameRewards | `0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9` |
+| ConversionContract | `0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9` |
+| NFTClaim | `0x5FC8d32690cc91D4c39d9d3abcBD16989F875707` |
+
+### Sepolia (Fallback Network)
 
 | Contract | Address |
 |----------|---------|
@@ -138,13 +135,36 @@ forge test
 | ConversionContract | `0x2dbfae1ff52735a145bbdfc0822085143bd462e3` |
 | NFTClaim | `0x037feb654b637226b5503a237361d1c3b4de7b30` |
 
-## 🎯 Game Features
+## 🌐 Multi-Network Support
+
+The SADCOIN email game now supports multiple blockchain networks with automatic fallback:
+
+### **Primary Network: Avalanche Fuji**
+- **Chain ID**: 43113
+- **Native Token**: AVAX
+- **RPC**: `https://api.avax-test.network/ext/bc/C/rpc`
+- **Explorer**: [Snowtrace Testnet](https://testnet.snowtrace.io)
+
+### **Fallback Network: Ethereum Sepolia**
+- **Chain ID**: 11155111
+- **Native Token**: ETH
+- **RPC**: `https://sepolia.drpc.org`
+- **Explorer**: [Sepolia Etherscan](https://sepolia.etherscan.io)
+
+### **Network Features**
+- **Automatic Detection**: Frontend automatically detects your current network
+- **Smart Contract Mapping**: Same contracts deployed on both networks
+- **Seamless Switching**: Switch between networks without losing progress
+- **Network Status Display**: Real-time network information in the UI
+
+## � Game Features
 
 - **4 Corporate Archetypes**: Each with unique personality and mini-game
 - **Dynamic Story Generation**: AI adapts based on your choices
 - **Intentionally Buggy Mini-games**: Frustration drives productivity
 - **Real Email Output**: Actually sends usable emails to your inbox
 - **Blockchain Rewards**: Earn tokens for being productively sad
+- **Multi-Network Support**: Play on Avalanche Fuji or Ethereum Sepolia
 
 ## 👥 Team
 
@@ -162,6 +182,25 @@ Built for **Chainlink Chromion Hackathon 2025**
 - Novel use of Chainlink VRF for "productive randomness"
 - Emotional damage tracking as on-chain reputation
 - Procrastination-to-productivity conversion mechanism
+- Multi-network blockchain support with automatic fallback
+
+## 🔄 Migration Notes
+
+### Avalanche Fuji Migration (January 2025)
+The SADCOIN email game has been migrated from Sepolia-only to multi-network support:
+
+- **Primary Network**: Avalanche Fuji (Chain ID: 43113)
+- **Fallback Network**: Ethereum Sepolia (Chain ID: 11155111)
+- **Smart Contracts**: Deployed on both networks with identical functionality
+- **Frontend**: Updated with network-aware contract management
+- **Wallet Integration**: Prioritizes Avalanche Fuji, falls back to Sepolia
+
+### Technical Implementation
+- Network-aware contract address mapping
+- Dynamic RPC endpoint selection
+- Automatic network detection and switching
+- Real-time network status display
+- Cross-network compatibility maintained
 
 ## 📄 License
 
