@@ -496,7 +496,7 @@ export default function Component() {
         feelsBalance={feels}
         onAboutClick={() => setIsAboutModalOpen(true)}
       />
-      <div className="bg-black" style={{ minHeight: "calc(100vh - 70px)" }}>
+      <div className="bg-black" style={{ minHeight: "calc(100vh - 70px)", marginTop: "80px" }}>
         {/* Monitor Area */}
         <CRTContainer>
           <Card className="border-2 border-green-400 bg-black text-green-400 w-full h-full flex flex-col">
@@ -518,6 +518,7 @@ export default function Component() {
             onSubmit={handleEmailSubmit} 
             onWaterCooler={gameState === "water-cooler" ? handleBackFromWaterCooler : handleWaterCooler}
             isWaterCoolerMode={gameState === "water-cooler"}
+            isLoading={isGeneratingEmail}
           />
         )}
         

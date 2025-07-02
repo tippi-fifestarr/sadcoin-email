@@ -28,12 +28,25 @@ export function EmailInputScreen({ onSubmit }: EmailInputScreenProps) {
   )
 }
 
-// Container component for the footer area
-export function EmailInputContainer({ onSubmit, onWaterCooler, isWaterCoolerMode }: EmailInputScreenProps) {
+interface EmailInputContainerProps extends EmailInputScreenProps {
+  isLoading?: boolean;
+}
+
+export function EmailInputContainer({ onSubmit, onWaterCooler, isWaterCoolerMode, isLoading }: EmailInputContainerProps) {
   const [userSadInput, setUserSadInput] = useState('')
 
   const handleSubmit = () => {
     onSubmit(userSadInput)
+  }
+
+  if (isLoading) {
+    return (
+      <div className="w-full bg-black border-2 border-green-400 p-6 flex flex-col items-center justify-center min-h-[220px]">
+        <div className="text-green-400 font-mono text-lg animate-pulse text-center">
+          <span>☠️ Summoning the Sadness...<br/>Please wait while the AI ponders your misery. ☠️</span>
+        </div>
+      </div>
+    );
   }
 
   return (
